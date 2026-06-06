@@ -4,6 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Orvalho — Propostas Comerciais</title>
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBTCnITmxkisXJ4-HFQG08OjtgwQGfsmDQ",
+    authDomain: "orvalho-propostas.firebaseapp.com",
+    projectId: "orvalho-propostas",
+    storageBucket: "orvalho-propostas.firebasestorage.app",
+    messagingSenderId: "620991351828",
+    appId: "1:620991351828:web:7c20ce8242cb84e75dab01"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  window._FB = {
+    db, auth,
+    signIn: (email, pass) => signInWithEmailAndPassword(auth, email, pass),
+    signOut: () => signOut(auth),
+    onAuth: (cb) => onAuthStateChanged(auth, cb),
+    save: async (colName, docId, data) => {
+      await setDoc(doc(db, 'orvalho', colName, 'docs', docId), {_d: JSON.stringify(data), _t: Date.now()});
+    },
+    load: async (colName, docId) => {
+      const snap = await getDoc(doc(db, 'orvalho', colName, 'docs', docId));
+      if (!snap.exists()) return null;
+      const raw = snap.data();
+      return raw._d ? JSON.parse(raw._d) : raw;
+    },
+    loadAll: async (colName) => {
+      const snap = await getDocs(collection(db, 'orvalho', colName, 'docs'));
+      return snap.docs.map(d => { const r=d.data(); return r._d ? JSON.parse(r._d) : r; });
+    },
+  };
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -145,9 +184,31 @@ tr:hover td{background:var(--bg)}
 <script type="text/babel">
 const{useState,useEffect,useCallback,useMemo}=React;
 
+// ─── LocalStorage fallback (cache local) ─────────────────────────
 const LS={
   get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
   set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+};
+
+// ─── Firebase helpers ─────────────────────────────────────────────
+const FB={
+  ready:()=>!!window._FB,
+  save:async(col,id,data)=>{
+    LS.set('orv2_'+col,data); // cache local sempre
+    if(window._FB) await window._FB.save(col,id,data);
+  },
+  load:async(col,id,def)=>{
+    if(window._FB){
+      try{const d=await window._FB.load(col,id);if(d)return d;}catch{}
+    }
+    return LS.get('orv2_'+col,def);
+  },
+  loadAll:async(col,def)=>{
+    if(window._FB){
+      try{const arr=await window._FB.loadAll(col);if(arr&&arr.length>0)return arr;}catch{}
+    }
+    return LS.get('orv2_'+col,def);
+  },
 };
 
 const fmtBRL=v=>(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -441,9 +502,11 @@ async function generateWord(prop, services, configs) {
 
 // ─── APP ────────────────────────────────────────────────────────
 function App(){
-  const[authed,setAuthed]=useState(()=>LS.get('orv_auth2',false));
+  const[authed,setAuthed]=useState(false);
+  const[fbUser,setFbUser]=useState(null);
+  const[loading,setLoading]=useState(true);
   const[page,setPage]=useState('propostas');
-  const[proposals,setProposals]=useState(()=>LS.get('orv_proposals2',[]));
+  const[proposals,setProposals]=useState([]);
   const[services,setServices]=useState(()=>LS.get('orv_services2',DEFAULT_SERVICES));
   const[cnaes,setCnaes]=useState(()=>LS.get('orv_cnaes2',DEFAULT_CNAE));
   const[fixedCosts,setFixedCosts]=useState(()=>LS.get('orv_fixedcosts2',DEFAULT_FIXED_COSTS));
@@ -453,14 +516,59 @@ function App(){
     empresa:{name:'Orvalho Consultoria Ambiental',cnpj:'',endereco:'Joinville/SC',contato:'+55 47 99245-4106',responsavel:'Bianca da Cruz Iéck'}
   }));
   const[sidebarOpen,setSidebarOpen]=useState(false);
+  const[syncStatus,setSyncStatus]=useState('');
 
-  useEffect(()=>{LS.set('orv_proposals2',proposals);},[proposals]);
-  useEffect(()=>{LS.set('orv_services2',services);},[services]);
-  useEffect(()=>{LS.set('orv_cnaes2',cnaes);},[cnaes]);
-  useEffect(()=>{LS.set('orv_fixedcosts2',fixedCosts);},[fixedCosts]);
-  useEffect(()=>{LS.set('orv_configs2',configs);},[configs]);
+  useEffect(()=>{
+    const init=()=>{
+      if(window._FB){
+        window._FB.onAuth(user=>{
+          setFbUser(user);setAuthed(!!user);setLoading(false);
+          if(user) loadFromFirebase();
+        });
+      } else { setTimeout(init,300); }
+    };
+    init();
+  },[]);
 
-  if(!authed) return <Login onLogin={()=>{setAuthed(true);LS.set('orv_auth2',true);}}/>;
+  const loadFromFirebase=async()=>{
+    try{
+      setSyncStatus('Sincronizando...');
+      const ps=await FB.loadAll('proposals',[]);
+      if(ps&&ps.length>0) setProposals(ps.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)));
+      else setProposals(LS.get('orv_proposals2',[]));
+      const sv=await FB.load('config','services',null);
+      if(sv) setServices(Array.isArray(sv)?sv:DEFAULT_SERVICES);
+      const cn=await FB.load('config','cnaes',null);
+      if(cn) setCnaes(Array.isArray(cn)?cn:DEFAULT_CNAE);
+      const cf=await FB.load('config','fixedcosts',null);
+      if(cf) setFixedCosts(Array.isArray(cf)?cf:DEFAULT_FIXED_COSTS);
+      const cfg=await FB.load('config','configs',null);
+      if(cfg) setConfigs(cfg);
+      setSyncStatus('✓ Salvo na nuvem');
+      setTimeout(()=>setSyncStatus(''),3000);
+    }catch(e){ setSyncStatus('⚠️ Modo offline'); setProposals(LS.get('orv_proposals2',[])); }
+  };
+
+  useEffect(()=>{
+    LS.set('orv_proposals2',proposals);
+    if(!fbUser||proposals.length===0) return;
+    proposals.forEach(p=>{ FB.save('proposals',String(p.id),p).catch(()=>{}); });
+  },[proposals]);
+
+  useEffect(()=>{ LS.set('orv_services2',services); if(fbUser) FB.save('config','services',services).catch(()=>{}); },[services]);
+  useEffect(()=>{ LS.set('orv_cnaes2',cnaes); if(fbUser) FB.save('config','cnaes',cnaes).catch(()=>{}); },[cnaes]);
+  useEffect(()=>{ LS.set('orv_fixedcosts2',fixedCosts); if(fbUser) FB.save('config','fixedcosts',fixedCosts).catch(()=>{}); },[fixedCosts]);
+  useEffect(()=>{ LS.set('orv_configs2',configs); if(fbUser) FB.save('config','configs',configs).catch(()=>{}); },[configs]);
+
+  if(loading) return(
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(135deg,#285d02,#133b65)',flexDirection:'column',gap:14}}>
+      <div style={{fontSize:48}}>🌿</div>
+      <div style={{color:'#fff',fontSize:20,fontFamily:'Playfair Display,serif',fontWeight:700}}>Orvalho</div>
+      <div style={{color:'rgba(255,255,255,.6)',fontSize:13}}>Conectando ao servidor...</div>
+    </div>
+  );
+
+  if(!authed) return <Login/>;
 
   const nav=[
     {id:'dashboard',icon:'📊',label:'Dashboard'},
@@ -468,6 +576,11 @@ function App(){
     {id:'nova',icon:'✨',label:'Nova Proposta'},
     {id:'configuracoes',icon:'⚙️',label:'Configurações'},
   ];
+
+  const handleSignOut=async()=>{
+    if(window._FB) await window._FB.signOut();
+    setAuthed(false);setFbUser(null);
+  };
 
   return(
     <div className="app">
@@ -488,8 +601,9 @@ function App(){
           ))}
         </nav>
         <div className="sidebar-footer">
-          <div className="user"><strong>Bianca Iéck</strong>Orvalho Consultoria Ambiental</div>
-          <button className="btn btn-secondary btn-sm" style={{marginTop:8,width:'100%'}} onClick={()=>{setAuthed(false);LS.set('orv_auth2',false);}}>Sair</button>
+          {syncStatus&&<div style={{fontSize:11,color:'rgba(255,255,255,.7)',marginBottom:5,textAlign:'center'}}>{syncStatus}</div>}
+          <div className="user"><strong>Bianca Iéck</strong>{fbUser?.email||'Orvalho Consultoria'}</div>
+          <button className="btn btn-secondary btn-sm" style={{marginTop:8,width:'100%'}} onClick={handleSignOut}>Sair</button>
         </div>
       </aside>
       <main className="main">
@@ -501,11 +615,30 @@ function App(){
     </div>
   );
 }
-
 // ─── LOGIN ───────────────────────────────────────────────────────
-function Login({onLogin}){
-  const[u,su]=useState('');const[p,sp]=useState('');const[err,se]=useState('');
-  const go=()=>{if(u==='bianca'&&p==='orvalho2026')onLogin();else se('Usuário ou senha incorretos.');};
+function Login(){
+  const[email,setEmail]=useState('bianca@orvalhoambiental.com.br');
+  const[pass,setPass]=useState('');
+  const[err,setErr]=useState('');
+  const[loading,setLoading]=useState(false);
+  const go=async()=>{
+    if(!email||!pass){setErr('Preencha e-mail e senha.');return;}
+    setLoading(true);setErr('');
+    try{
+      if(window._FB){ await window._FB.signIn(email,pass); }
+      else { setErr('Aguarde, conectando ao servidor...'); }
+    }catch(e){
+      const msgs={
+        'auth/invalid-credential':'E-mail ou senha incorretos.',
+        'auth/user-not-found':'Usuário não encontrado.',
+        'auth/wrong-password':'Senha incorreta.',
+        'auth/too-many-requests':'Muitas tentativas. Aguarde alguns minutos.',
+        'auth/network-request-failed':'Sem conexão com a internet.',
+      };
+      setErr(msgs[e.code]||'Erro ao entrar: '+e.message);
+    }
+    setLoading(false);
+  };
   return(
     <div className="login-wrap">
       <div className="login-card">
@@ -515,9 +648,10 @@ function Login({onLogin}){
           <p>Sistema de Propostas Comerciais</p>
         </div>
         {err&&<div className="alert alert-warning">{err}</div>}
-        <div className="form-group"><label className="form-label">Usuário</label><input className="form-control" value={u} onChange={e=>su(e.target.value)} placeholder="bianca" onKeyDown={e=>e.key==='Enter'&&go()}/></div>
-        <div className="form-group"><label className="form-label">Senha</label><input className="form-control" type="password" value={p} onChange={e=>sp(e.target.value)} placeholder="••••••••" onKeyDown={e=>e.key==='Enter'&&go()}/></div>
-        <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'11px'}} onClick={go}>Entrar</button>
+        <div className="form-group"><label className="form-label">E-mail</label><input className="form-control" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="seu@email.com" onKeyDown={e=>e.key==='Enter'&&go()}/></div>
+        <div className="form-group"><label className="form-label">Senha</label><input className="form-control" type="password" value={pass} onChange={e=>setPass(e.target.value)} placeholder="••••••••" onKeyDown={e=>e.key==='Enter'&&go()}/></div>
+        <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'11px'}} onClick={go} disabled={loading}>{loading?'Entrando...':'Entrar'}</button>
+        <div style={{marginTop:14,fontSize:12,color:'var(--txl)',textAlign:'center'}}>Primeiro acesso? Use seu e-mail e senha cadastrados no Firebase Authentication.</div>
       </div>
     </div>
   );
