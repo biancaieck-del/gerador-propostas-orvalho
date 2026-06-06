@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orvalho — Propostas Comerciais</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--vd:#285d02;--vl:#9abf4a;--az:#133b65;--vm:#4d7368;--am:#d9b449;--bg:#f5f4ef;--bgc:#fff;--tx:#1a1a18;--txl:#5a5a52;--bd:#e2e0d6;--r:12px;--rs:8px;--sh:0 2px 12px rgba(40,93,2,.08);--shl:0 8px 32px rgba(40,93,2,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+h1,h2,h3{font-family:'Playfair Display',serif}
+.app{display:flex;min-height:100vh}
+.sidebar{width:260px;min-height:100vh;background:var(--vd);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s}
+.sidebar-logo{padding:20px 20px 14px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-logo .brand{color:#fff;font-size:10px;letter-spacing:3px;text-transform:uppercase;opacity:.55;margin-bottom:3px}
+.sidebar-logo .name{color:#fff;font-family:'Playfair Display',serif;font-size:18px;line-height:1.2}
+.sidebar-logo .tagline{color:var(--vl);font-size:10px;margin-top:3px;font-style:italic;opacity:.85}
+.sidebar-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--rs);color:rgba(255,255,255,.7);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .18s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.active{background:var(--vl);color:var(--vd);font-weight:600}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sidebar-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.1)}
+.sidebar-footer .user{color:rgba(255,255,255,.6);font-size:12px}
+.sidebar-footer .user strong{color:#fff;display:block;font-size:13px}
+.main{margin-left:260px;flex:1;padding:26px;min-height:100vh}
+.page-header{margin-bottom:24px}
+.page-header h2{font-size:24px;color:var(--vd)}
+.page-header p{color:var(--txl);font-size:13.5px;margin-top:3px}
+.card{background:var(--bgc);border-radius:var(--r);border:1px solid var(--bd);padding:20px;box-shadow:var(--sh)}
+.card-title{font-size:12px;font-weight:600;color:var(--txl);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--rs);font-size:13.5px;font-weight:500;cursor:pointer;border:none;transition:all .18s;font-family:inherit}
+.btn-primary{background:var(--vd);color:#fff}.btn-primary:hover{background:#1e4701}
+.btn-secondary{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}.btn-secondary:hover{background:var(--bd)}
+.btn-green{background:var(--vl);color:var(--vd);font-weight:600}.btn-green:hover{background:#8aaf3a}
+.btn-danger{background:#fee2e2;color:#b91c1c}.btn-danger:hover{background:#fecaca}
+.btn-sm{padding:5px 11px;font-size:12.5px}
+.btn-icon{padding:7px;border-radius:var(--rs);background:var(--bg);border:1px solid var(--bd);cursor:pointer;font-size:14px;transition:all .18s;line-height:1}
+.btn-icon:hover{background:var(--bd)}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12.5px;font-weight:500;color:var(--tx);margin-bottom:5px}
+.form-label span{color:#b91c1c}
+.form-control{width:100%;padding:9px 12px;border:1px solid var(--bd);border-radius:var(--rs);font-family:inherit;font-size:13.5px;color:var(--tx);background:#fff;transition:border-color .18s;outline:none}
+.form-control:focus{border-color:var(--vl);box-shadow:0 0 0 3px rgba(154,191,74,.14)}
+textarea.form-control{resize:vertical;min-height:88px;line-height:1.5}
+select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M6 8L0 0h12z' fill='%235a5a52'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+.form-row{display:grid;gap:14px}
+.form-row.cols-2{grid-template-columns:1fr 1fr}
+.form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:600}
+.badge-elaborando{background:#fef9c3;color:#854d0e}.badge-enviada{background:#dbeafe;color:#1e40af}
+.badge-aprovada{background:#dcfce7;color:#166534}.badge-reprovada{background:#fee2e2;color:#991b1b}
+.badge-semresposta{background:#f3f4f6;color:#4b5563}.badge-cancelada{background:#1a1a18;color:#fff}
+.table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{background:var(--bg);color:var(--txl);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:11px 13px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
+td{padding:12px 13px;border-bottom:1px solid var(--bd);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+.actions{display:flex;gap:5px}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--vd) 0%,var(--az) 100%)}
+.login-card{background:#fff;border-radius:20px;padding:44px 38px;width:100%;max-width:400px;box-shadow:var(--shl)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .orv-icon{font-size:52px;display:block;margin-bottom:8px}
+.login-logo h1{font-size:22px;color:var(--vd)}
+.login-logo p{color:var(--txl);font-size:12.5px;font-style:italic}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:22px;overflow-y:auto}
+.modal{background:#fff;border-radius:var(--r);width:100%;max-width:880px;box-shadow:var(--shl);animation:mIn .22s ease;margin:auto}
+.modal-lg{max-width:1100px}
+@keyframes mIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:17px;color:var(--vd)}
+.modal-body{padding:22px;max-height:80vh;overflow-y:auto}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:9px;justify-content:flex-end}
+.tabs{display:flex;gap:2px;background:var(--bg);border-radius:var(--rs);padding:4px;margin-bottom:22px}
+.tab{flex:1;padding:8px 12px;border-radius:6px;font-size:12.5px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--txl);transition:all .18s;text-align:center;white-space:nowrap}
+.tab.active{background:#fff;color:var(--vd);box-shadow:0 1px 4px rgba(0,0,0,.09);font-weight:600}
+.calc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.calc-label{font-size:13.5px;color:var(--tx);flex:1}
+.calc-input{width:120px}
+.calc-value{font-size:13.5px;font-weight:600;color:var(--vd);min-width:105px;text-align:right}
+.service-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.service-chip{display:flex;align-items:center;gap:7px;padding:9px 12px;border-radius:var(--rs);border:1.5px solid var(--bd);cursor:pointer;transition:all .16s;font-size:12.5px;background:#fff;color:var(--tx)}
+.service-chip.selected{border-color:var(--vl);background:rgba(154,191,74,.08);color:var(--vd);font-weight:500}
+.service-chip .check{width:17px;height:17px;border-radius:4px;border:2px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;transition:all .16s}
+.service-chip.selected .check{background:var(--vl);border-color:var(--vl);color:#fff}
+.alert{padding:11px 14px;border-radius:var(--rs);font-size:13.5px;margin-bottom:14px;border-left:4px solid}
+.alert-warning{background:#fef9c3;border-color:var(--am);color:#854d0e}
+.alert-success{background:#dcfce7;border-color:var(--vl);color:#166534}
+.alert-info{background:#dbeafe;border-color:var(--az);color:#1e40af}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px}
+.kpi-card{background:var(--bgc);border-radius:var(--r);border:1px solid var(--bd);padding:17px;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--vl)}
+.kpi-card.blue::before{background:var(--az)}.kpi-card.yellow::before{background:var(--am)}.kpi-card.red::before{background:#bf6e50}
+.kpi-icon{font-size:20px;margin-bottom:7px}
+.kpi-value{font-size:24px;font-family:'Playfair Display',serif;font-weight:700;color:var(--vd)}
+.kpi-label{font-size:11.5px;color:var(--txl);margin-top:2px}
+.reminder-badge{display:inline-flex;align-items:center;gap:3px;background:#fef3c7;color:#92400e;font-size:10.5px;font-weight:600;padding:2px 6px;border-radius:10px}
+.config-item{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--bd)}
+.config-item:last-child{border-bottom:none}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+.hamburger{display:none;background:var(--vd);color:#fff;border:none;padding:10px;border-radius:var(--rs);cursor:pointer;font-size:19px;position:fixed;top:14px;left:14px;z-index:101}
+.divider{height:1px;background:var(--bd);margin:18px 0}
+.text-sm{font-size:12.5px}.text-muted{color:var(--txl)}.text-right{text-align:right}
+.flex{display:flex}.flex-between{display:flex;align-items:center;justify-content:space-between}
+.flex-gap{display:flex;align-items:center;gap:8px}
+.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mb-16{margin-bottom:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.empty-state{text-align:center;padding:44px 22px;color:var(--txl)}
+.empty-state .icon{font-size:40px;margin-bottom:11px}
+.empty-state h3{font-size:16px;color:var(--tx);margin-bottom:5px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.input-prefix{display:flex}
+.input-prefix .prefix{background:var(--bg);border:1px solid var(--bd);border-right:none;border-radius:var(--rs) 0 0 var(--rs);padding:9px 11px;font-size:13.5px;color:var(--txl);white-space:nowrap}
+.input-prefix .form-control{border-radius:0 var(--rs) var(--rs) 0}
+.cf-table{width:100%;border-collapse:collapse;font-size:13px}
+.cf-table th{background:var(--bg);padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:var(--txl);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)}
+.cf-table td{padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.cf-table tr:last-child td{border-bottom:none}
+/* Dashboard charts */
+.dash-chart-bar{display:flex;align-items:flex-end;gap:6px;height:120px;padding:8px 0}
+.dash-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.dash-bar{background:var(--vl);border-radius:4px 4px 0 0;width:100%;min-height:2px;transition:height .3s}
+.dash-bar-label{font-size:10px;color:var(--txl);text-align:center;white-space:nowrap}
+.dash-bar-val{font-size:9.5px;color:var(--vd);font-weight:600;text-align:center}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:16px;padding-top:58px}
+  .form-row.cols-2,.form-row.cols-3{grid-template-columns:1fr}
+  .service-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr 1fr}
+  .grid-2{grid-template-columns:1fr}.hamburger{display:flex}.sidebar-backdrop{display:block}
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useEffect,useCallback,useMemo}=React;
+
+const LS={
+  get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+};
+
+const fmtBRL=v=>(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const fmtDate=d=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+const today=()=>new Date().toISOString().slice(0,10);
+
+// ─── LISTAS SUSPENSAS ────────────────────────────────────────────
+const CUSTOS_PROJETO_LISTA=[
+  'Aluguel de Carro','ART','Câmera Trap','Cartão de memória Câmera',
+  'Deslocamento (Combustível + pedágios) ida e volta','EPI',
+  'Fita Métrica','Gancho Herpetofauna','Hospedagem','Imprevistos',
+  'Impressão gráfica','Iscas Câmera Trap','Material gráfico','Mecânico',
+  'Passagem aérea','Passagem ônibus','Pilhas câmera trap',
+  'Refeições','Tablet','Trena','Uber','Outro'
+];
+
+const TERCEIROS_LISTA=[
+  'Auxiliar de Fauna','Auxiliar de Flora','Auxiliar de Ictiofauna',
+  'Auxiliar para elaboração de laudos','Auxiliar para elaboração de Mapas',
+  'Botânico','Educador(a) Ambiental','Engenheiro(a) Ambiental',
+  'Engenheiro(a) Civil','Especialista em Geoprocessamento',
+  'Especialista em Mastofauna','Herpetólogo(a)','Ictiólogo(a)',
+  'Ornitólogo(a)','Palestrante','Parceria','Veterinário','Outro'
+];
+
+const PRAZO_VISITA_OPTS=[
+  {value:'imediata',label:'Disponibilidade imediata'},
+  {value:'5du',label:'Até 5 dias úteis para mobilização do campo'},
+  {value:'10du',label:'Até 10 dias úteis para mobilização do campo'},
+  {value:'15du',label:'Até 15 dias úteis para mobilização do campo'},
+  {value:'a_combinar',label:'A combinar com o cliente'},
+];
+
+const PARCELA_QUANDO_OPTS=[
+  'Ato da assinatura do contrato',
+  '15 dias após assinatura','30 dias após assinatura',
+  '45 dias após assinatura','60 dias após assinatura',
+  '90 dias após assinatura','120 dias após assinatura',
+  'Na entrega do relatório','Após aprovação pelo órgão ambiental',
+  'A combinar','Outra data'
+];
+
+const DEFAULT_FIXED_COSTS=[
+  {id:1,nome:'Canva',valor:35.90,tipo:'mensal'},
+  {id:2,nome:'CRBio',valor:850,tipo:'anual'},
+  {id:3,nome:'Luz',valor:30,tipo:'mensal'},
+  {id:4,nome:'Hospedagem do site e manutenção',valor:50,tipo:'mensal'},
+  {id:5,nome:'Contabilidade',valor:248,tipo:'mensal'},
+  {id:6,nome:'Internet',valor:30,tipo:'mensal'},
+  {id:7,nome:'Taxa de licenciamento (alvará)',valor:27,tipo:'mensal'},
+];
+
+// ─── SERVICES ───────────────────────────────────────────────────
+const DEFAULT_SERVICES=[
+  {id:'fauna',name:'Levantamento de Fauna Terrestre',cnae:'1',scope:`Levantamento de fauna qualitativo com esforço amostral em campo de 5 dias. A campanha contemplará os três períodos do dia, com enfoque nos seguintes grupos faunísticos: mastofauna, herpetofauna e ornitofauna:
+
+• Para o grupo de herpetofauna, serão usadas as metodologias de procura visual, auditiva e avistamentos oportunísticos;
+• Para o grupo de mastofauna, será utilizada armadilha fotográfica de captação noturna e diurna, instalada no local durante os 5 dias de campo; procura visual, auditiva e busca ativa por vestígios (fezes, pegadas e odores);
+• Para o grupo de ornitofauna, serão utilizadas as metodologias de procura visual e auditiva, com auxílio de câmera Nikon e binóculo; evidências indiretas e pontos de escuta;
+• Elaboração de mapas e planta e/ou imagem georreferenciada, na escala 1:10.000, dos locais amostrados e de eventual observação de espécies ameaçadas da fauna;
+• No laudo serão indicadas as espécies endêmicas, ameaçadas de extinção e migratórias, segundo as listas oficiais nacional e estadual;
+• O laudo técnico será elaborado de acordo com a legislação de referência aplicável.
+
+Identificação e Avaliação de impactos ambientais:
+• Serão avaliados os potenciais impactos da atividade para a fauna local;
+• Proposição de medidas de mitigação para minimizar os impactos identificados;
+• Emissão de ART dos profissionais envolvidos.`},
+  {id:'floristico',name:'Levantamento Florístico e Fitossociológico',cnae:'1',scope:`• Levantamento florístico e listagem total das espécies nativas identificadas na Área Diretamente Afetada (ADA);
+• Visita técnica (3 dias) para montagem das parcelas de no mínimo 100 m² — conforme IN nº 23;
+• Levantamento fitossociológico;
+• Laudo de caracterização da vegetação;
+• Relatório descritivo com a forma de Compensação pela Supressão de Vegetação;
+• Relatório fotográfico;
+• Delimitação sobre imagem de satélite, escala 1:2.000, com classificação por fisionomia e estágio de sucessão ecológica;
+• Emissão de ART dos profissionais envolvidos.`},
+  {id:'gestao_clinicas',name:'Gestão Ambiental',cnae:'1',scope:`• Assessoria para respostas de notificações e/ou ofícios ambientais;
+• Acompanhamento e controle das condicionantes da Licença Ambiental de Operação;
+• Visitas técnicas para verificação dos sistemas de controle ambiental, quando necessário;
+• Elaboração e atualização de planilha de gerenciamento e controle de resíduos;
+• Acompanhamento da periodicidade das análises de águas subterrâneas (poços de monitoramento);
+• Emissão de parecer técnico conclusivo dos ensaios laboratoriais, com ART;
+• Protocolo anual das condicionantes junto ao órgão ambiental competente;
+• Assessoria para renovação da Licença Ambiental de Operação, quando necessário;
+• Elaboração de relatório mensal com ART, contendo detalhamento do manejo de resíduos;
+• Protocolo do Inventário dos MTRs (Manifesto de Transporte de Resíduos);
+• Emissão de ART.`},
+  {id:'eiv',name:'Estudo de Impacto de Vizinhança (EIV/RIV)',cnae:'1',scope:`Conforme Lei Federal nº 10.257/2001 (Estatuto da Cidade) e legislações municipais vigentes, a elaboração do EIV e do RIV contemplará:
+
+• Caracterização do Empreendimento;
+• Delimitação e Diagnóstico da Área de Influência;
+• Análise de Impactos: adensamento populacional, infraestrutura e saneamento, equipamentos públicos, geração de tráfego, paisagem urbana, poluição ambiental, risco à saúde, uso e ocupação do solo, valorização imobiliária, vegetação, arborização, fauna, ventilação e iluminação;
+• Avaliação de impactos socioeconômicos;
+• Proposição de medidas mitigadoras, compensatórias e potencializadoras;
+• Revisões e complementações até a aprovação final;
+• Até duas vistorias técnicas no local;
+• Imagens aéreas com drone;
+• Emissão de ART.`},
+  {id:'viabilidade',name:'Estudo de Viabilidade Ambiental',cnae:'1',scope:`• Levantamento e análise preliminar: análise de documentos fornecidos; consulta às bases públicas (CAR, IBGE, MapBiomas, INPE, SIGEF, ANA, geoprocessamento estadual e municipal);
+• Visita Técnica em campo: reconhecimento geral da área, identificação de cursos d'água, nascentes e APPs, registro fotográfico e georreferenciamento;
+• Diagnóstico Ambiental e Elaboração do Laudo: avaliação de meio físico e biótico, planta de sensibilidade ambiental com APPs, estimativa de Reserva Legal, identificação de áreas potencialmente edificáveis;
+• Análise de sobreposição com Unidades de Conservação;
+• Emissão de ART dos profissionais envolvidos.
+
+Produtos: Laudo técnico ambiental e Planta de sensibilidade ambiental.`},
+  {id:'inventario',name:'Inventário Florestal',cnae:'1',scope:`O Levantamento Florístico será realizado com a medição da circunferência à altura do peito (CAP), diâmetro (DAP) e altura de todos os indivíduos arbóreos, além da identificação botânica de todas as espécies:
+
+• Análise da área do entorno e histórico de uso e ocupação do solo;
+• Descrição da cobertura vegetal: estratos, classificação fitofisionômica, estágio de sucessão ecológica, espécies mais abundantes;
+• Levantamento florístico e fitossociológico: inventário das espécies nativas e análise da estrutura e composição;
+• Análise dendrológica: DAP, CAP e Altura;
+• Delimitação da vegetação sobre imagem de satélite, escala 1:2.000;
+• Emissão de ART de todos os profissionais envolvidos.`},
+  {id:'monit_fauna',name:'Monitoramento de Fauna (com Ictiofauna)',cnae:'1',scope:`Levantamento de fauna qualitativo com esforço amostral em campo de 5 dias (35 horas). Grupos: mastofauna, herpetofauna, ornitofauna e ictiofauna:
+
+• Herpetofauna: procura visual, auditiva e avistamentos oportunísticos;
+• Mastofauna: no mínimo 15 armadilhas fotográficas, busca ativa visual e por vestígios;
+• Ornitofauna: procura visual e auditiva, câmera Canon (75-300mm) e binóculo;
+• Ictiofauna: peneira/puçá e rede de arrasto — sujeito à autorização ambiental estadual;
+• Elaboração de mapas georreferenciados na escala 1:10.000;
+• Indicação de espécies endêmicas, ameaçadas e migratórias;
+• Identificação e avaliação de impactos ambientais; proposição de medidas mitigadoras;
+• Emissão de ART dos profissionais envolvidos.`},
+  {id:'palestra_sem_tema',name:'Palestra Ambiental Empresarial',cnae:'2',scope:`Ciclo de três palestras presenciais de 1 hora cada, conduzidas por profissionais especialistas:
+
+✔ Elaboração de material didático digital de apoio às palestras;
+✔ Condução por profissionais com experiência em educação e licenciamento ambiental;
+✔ Inclusão de casos reais do setor, personalizados à realidade da empresa;
+✔ Elaboração de três cartazes informativos, um por tema;
+✔ Espaço para esclarecimento de dúvidas práticas;
+✔ Emissão de certificados individuais de participação;
+✔ Emissão de ART referente à atividade.
+
+Sugestões de temas (ajustáveis conforme necessidade):
+1. Gestão ambiental e sustentabilidade: conformidades legais e cuidado com o meio ambiente;
+2. Impactos ambientais: resíduos, efluentes e emissões atmosféricas;
+3. ESG no dia a dia: indicadores, cultura organizacional e responsabilidade compartilhada.`},
+  {id:'palestra_com_tema',name:'Treinamento Ambiental com Tema Definido',cnae:'2',scope:`Treinamento presencial de 4 horas, dividido em dois módulos complementares:
+
+Módulo 1 (2h) — Legislação Ambiental:
+• Principais legislações com ênfase em flora e fauna (Código Florestal, Lei da Mata Atlântica, Crimes Ambientais, espécies protegidas);
+• Análise de caso aplicado ao contexto da equipe.
+
+Módulo 2 (2h) — Afugentamento e Resgate de Fauna:
+• Animais silvestres, afugentamento e contatos de emergência;
+• Manejo de Fauna Silvestre; animais peçonhentos; cuidados e prevenção (EPI); procedimentos de resgate.
+
+Inclusos: material didático digital, certificados individuais de participação, reuniões prévias para personalização e emissão de ART.`},
+];
+
+const DEFAULT_CNAE=[
+  {id:'1',code:'74.90-1-99',desc:'Atividades profissionais, científicas e técnicas',tax:0.155},
+  {id:'2',code:'85.99-6-04',desc:'Treinamento em desenvolvimento profissional e gerencial',tax:0.065},
+  {id:'sem_nf',code:'Sem nota fiscal',desc:'Sem emissão de nota fiscal',tax:0},
+];
+
+const DEFAULT_NOT_INCLUDED=`• Concepção de projeto de recomposição de APP em caso de intervenções;
+• Concepção de projeto de compensação ambiental em outros locais;
+• Plano de gerenciamento de resíduos de construção civil;
+• Protocolo e acompanhamento no órgão responsável;
+• Despesas gráficas (impressos, plotagem, encadernação, etc.);
+• Pagamentos de taxas aos órgãos ambientais;
+• Representação jurídica perante processos administrativos;
+• Quaisquer outros estudos não citados acima no escopo.`;
+
+const DEFAULT_RESP_CONTRATADA=`• Executar os serviços de acordo com as normas vigentes, visando ética, transparência e qualidade;
+• Enviar os dados técnicos e todos os elementos necessários, quando solicitados pela CONTRATANTE;
+• Sanar todas as dúvidas referentes aos estudos contemplados no escopo;
+• Informar semanalmente sobre o andamento dos estudos descritos no escopo;
+• Realizar os serviços com todos os EPIs necessários;
+• Realizar ajustes solicitados pelo Órgão ambiental.`;
+
+const DEFAULT_RESP_CONTRATANTE=`• Fornecer todas as informações e documentos disponíveis no prazo de até 10 dias;
+• Indicar pessoa responsável para acompanhamento do processo e participação de reuniões;
+• Intermediar a entrada no local para a realização do estudo.`;
+
+const DEFAULT_COST_TEXT=`A proposta contempla os custos relativos à logística, incluindo deslocamento, alimentação e estadia para todas as campanhas de campo necessárias, honorários dos profissionais envolvidos, emissão de Anotação de Responsabilidade Técnica (ART) dos profissionais envolvidos, materiais de consumo e reposição, Equipamentos de Proteção Individual (EPIs) e impostos relacionados à emissão de nota fiscal.`;
+
+// ─── GERADOR DE NÚMERO ───────────────────────────────────────────
+function genProposalNumber(proposals, dateStr) {
+  const d = dateStr ? new Date(dateStr+'T12:00:00') : new Date();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = String(d.getFullYear()).slice(2);
+  const prefix = `ORV-${dd}${mm}${yy}`;
+  const same = proposals.filter(p => p.number && p.number.startsWith(prefix));
+  return `${prefix}-${String(same.length+1).padStart(2,'0')}`;
+}
+
+// ─── GERAR WORD ──────────────────────────────────────────────────
+async function generateWord(prop, services, configs) {
+  try {
+    const {Document,Packer,Paragraph,TextRun,AlignmentType,Table,TableRow,TableCell,WidthType,BorderStyle,ShadingType,HeadingLevel} = window.docx;
+    const G='285D02',LG='9ABF4A',B='133B65';
+    const nb={style:BorderStyle.NONE,size:0,color:'FFFFFF'};
+    const nbs={top:nb,bottom:nb,left:nb,right:nb,insideH:nb,insideV:nb};
+    const bold=(t,sz=24,col='000000')=>new TextRun({text:t,bold:true,size:sz,color:col,font:'Calibri'});
+    const run=(t,sz=24,col='000000',it=false)=>new TextRun({text:t,size:sz,color:col,italic:it,font:'Calibri'});
+    const par=(ch,al=AlignmentType.LEFT,sp={after:160})=>new Paragraph({children:ch,alignment:al,spacing:sp});
+    const head=(t,lv=1)=>new Paragraph({children:[bold(t,lv===1?28:24,lv===1?G:B)],spacing:{before:280,after:100}});
+    const divider=()=>par([run('─'.repeat(80),'','DDDDDD')],AlignmentType.LEFT,{after:160});
+
+    const svcNames=(prop.selectedServices||[]).map(id=>prop.serviceTitles?.[id]||services.find(s=>s.id===id)?.name||id).join(' + ');
+    const total=prop.budget?.total||0;
+    const validity=prop.validity||20;
+    const ch=[];
+
+    // CAPA
+    ch.push(par([bold('ORVALHO CONSULTORIA AMBIENTAL',36,G)],AlignmentType.CENTER,{after:80}));
+    ch.push(par([run('Conectando negócios à natureza de maneira inteligente e responsável.',22,'555555',true)],AlignmentType.CENTER,{after:360}));
+    ch.push(par([bold('PROPOSTA COMERCIAL',32,B)],AlignmentType.CENTER,{after:80}));
+    ch.push(par([bold(prop.proposalName||svcNames,26,G)],AlignmentType.CENTER,{after:260}));
+    ch.push(par([run('Nº ',24,'888888'),bold(prop.number,24,B)],AlignmentType.CENTER,{after:70}));
+    ch.push(par([run('Data: ',22,'888888'),run(fmtDate(prop.date),22)],AlignmentType.CENTER,{after:70}));
+    ch.push(par([run('Validade: ',22,'888888'),run(`${validity} dias corridos`,22)],AlignmentType.CENTER,{after:360}));
+    if(prop.client){
+      ch.push(par([run('Requerente: ',22,'888888'),bold(prop.client,22)],AlignmentType.CENTER,{after:60}));
+      if(prop.clientCnpj) ch.push(par([run('CNPJ/CPF: ',22,'888888'),run(prop.clientCnpj,22)],AlignmentType.CENTER,{after:60}));
+      if(prop.clientContact) ch.push(par([run('Responsável: ',22,'888888'),run(prop.clientContact,22)],AlignmentType.CENTER,{after:60}));
+      if(prop.clientAddress) ch.push(par([run('Endereço: ',22,'888888'),run(prop.clientAddress,22)],AlignmentType.CENTER,{after:60}));
+    }
+    // OBJETIVO
+    if(prop.objective){ch.push(divider());ch.push(head('1. OBJETIVO'));ch.push(par([run(prop.objective,24)],AlignmentType.JUSTIFIED,{after:180}));}
+    // ESCOPO
+    ch.push(divider());ch.push(head('2. ESCOPO DOS SERVIÇOS'));
+    (prop.selectedServices||[]).forEach((sid,i)=>{
+      const title=prop.serviceTitles?.[sid]||services.find(s=>s.id===sid)?.name||sid;
+      const scope=prop.serviceScopes?.[sid]||'';
+      ch.push(head(`2.${i+1} ${title}`,2));
+      scope.split('\n').forEach(line=>{if(line.trim()) ch.push(par([run(line.trim(),22)],AlignmentType.JUSTIFIED,{after:90}));});
+    });
+    // Duração campo
+    if(prop.duracaoCampo){ch.push(par([bold('Duração das atividades em campo: ',22),run(prop.duracaoCampo,22)],AlignmentType.LEFT,{after:100}));}
+    // NÃO INCLUSO
+    if(prop.notIncluded){ch.push(divider());ch.push(head('3. NÃO INCLUSO NO ESCOPO'));prop.notIncluded.split('\n').filter(l=>l.trim()).forEach(l=>ch.push(par([run(l,22)],AlignmentType.LEFT,{after:70})));}
+    // RESPONSABILIDADES
+    ch.push(divider());ch.push(head('4. RESPONSABILIDADES CONTRATUAIS'));
+    ch.push(head('4.1 Responsabilidades da CONTRATADA',2));
+    (prop.respContratada||'').split('\n').filter(l=>l.trim()).forEach(l=>ch.push(par([run(l,22)],AlignmentType.JUSTIFIED,{after:70})));
+    ch.push(head('4.2 Responsabilidades da CONTRATANTE',2));
+    (prop.respContratante||'').split('\n').filter(l=>l.trim()).forEach(l=>ch.push(par([run(l,22)],AlignmentType.JUSTIFIED,{after:70})));
+    // PRAZOS
+    ch.push(divider());ch.push(head('5. PRAZOS'));
+    if(prop.prazoVisita){const opt=PRAZO_VISITA_OPTS.find(o=>o.value===prop.prazoVisita);ch.push(par([bold('Mobilização para campo: ',24),run(opt?.label||prop.prazoVisita,24)],AlignmentType.LEFT,{after:70}));}
+    if(prop.prazoEntrega) ch.push(par([bold('Entrega do documento: ',24),run(`${prop.prazoEntrega} dias úteis após a finalização das atividades em campo`,24)],AlignmentType.LEFT,{after:70}));
+    if(prop.duracaoCampo) ch.push(par([bold('Duração das atividades em campo: ',24),run(prop.duracaoCampo,24)],AlignmentType.LEFT,{after:70}));
+    // INVESTIMENTO
+    ch.push(divider());ch.push(head('6. INVESTIMENTO'));
+    // tabela valor
+    ch.push(new Table({width:{size:9000,type:WidthType.DXA},columnWidths:[6000,3000],rows:[
+      new TableRow({tableHeader:true,children:[
+        new TableCell({shading:{fill:G,type:ShadingType.CLEAR},borders:nbs,children:[par([bold('Serviço',22,'FFFFFF')],AlignmentType.LEFT,{after:0})]}),
+        new TableCell({shading:{fill:G,type:ShadingType.CLEAR},borders:nbs,children:[par([bold('Valor',22,'FFFFFF')],AlignmentType.RIGHT,{after:0})]}),
+      ]}),
+      new TableRow({children:[
+        new TableCell({shading:{fill:'F5F4EF',type:ShadingType.CLEAR},borders:nbs,children:[par([run(prop.proposalName||svcNames,22)],AlignmentType.LEFT,{after:0})]}),
+        new TableCell({shading:{fill:'F5F4EF',type:ShadingType.CLEAR},borders:nbs,children:[par([bold(fmtBRL(total),22,G)],AlignmentType.RIGHT,{after:0})]}),
+      ]}),
+    ]}));
+    if(prop.discount>0){
+      ch.push(par([run(`Desconto aplicado: ${prop.discount}% — Valor final: `,22),bold(fmtBRL(prop.budget?.totalComDesconto||total),22,G)],AlignmentType.LEFT,{after:120}));
+    }
+    if(prop.paymentText) ch.push(par([run(prop.paymentText,20,'555555',true)],AlignmentType.JUSTIFIED,{after:160}));
+    // PAGAMENTO
+    if((prop.parcels||[]).length>0){
+      ch.push(divider());ch.push(head('7. CONDIÇÕES DE PAGAMENTO'));
+      prop.parcels.forEach((p,i)=>{
+        const quando=p.quando||(p.dueDate?fmtDate(p.dueDate):'');
+        ch.push(par([bold(`${i+1}ª parcela: `,22),run(`${p.label||''} — ${fmtBRL(+(p.value||0))}${quando?' — '+quando:''}`,22)],AlignmentType.LEFT,{after:80}));
+      });
+      const methods=(prop.paymentMethods||[]).map(m=>({pix:'Pix',boleto:'Boleto Bancário',deposito:'Depósito Bancário',transferencia:'Transferência Bancária'})[m]||m);
+      if(methods.length>0) ch.push(par([run(`Formas de pagamento aceitas: ${methods.join(', ')}.`,22)],AlignmentType.LEFT,{after:80}));
+    }
+    // VALIDADE
+    ch.push(divider());ch.push(head('8. VALIDADE DA PROPOSTA'));
+    ch.push(par([run(`Esta proposta tem validade de ${validity} dias corridos a partir da data de emissão.`,24)],AlignmentType.JUSTIFIED,{after:200}));
+    // ASSINATURA
+    ch.push(divider());
+    ch.push(par([run(`Joinville/SC, ${fmtDate(prop.date)}`,22,'555555')],AlignmentType.CENTER,{after:200}));
+    ch.push(par([run('_'.repeat(50),22)],AlignmentType.CENTER,{after:60}));
+    ch.push(par([bold(configs.empresa?.responsavel||'Bianca da Cruz Iéck',22,G)],AlignmentType.CENTER,{after:40}));
+    ch.push(par([run('Orvalho Consultoria Ambiental',20,'555555')],AlignmentType.CENTER,{after:0}));
+
+    const doc=new Document({sections:[{properties:{page:{margin:{top:1134,right:1134,bottom:1134,left:1134}}},children:ch}]});
+    const blob=await Packer.toBlob(doc);
+    saveAs(blob,`Proposta_${prop.number||'Orvalho'}.docx`);
+  } catch(e) {
+    alert('Erro ao gerar Word: '+e.message);
+    console.error(e);
+  }
+}
+
+// ─── APP ────────────────────────────────────────────────────────
+function App(){
+  const[authed,setAuthed]=useState(()=>LS.get('orv_auth2',false));
+  const[page,setPage]=useState('propostas');
+  const[proposals,setProposals]=useState(()=>LS.get('orv_proposals2',[]));
+  const[services,setServices]=useState(()=>LS.get('orv_services2',DEFAULT_SERVICES));
+  const[cnaes,setCnaes]=useState(()=>LS.get('orv_cnaes2',DEFAULT_CNAE));
+  const[fixedCosts,setFixedCosts]=useState(()=>LS.get('orv_fixedcosts2',DEFAULT_FIXED_COSTS));
+  const[configs,setConfigs]=useState(()=>LS.get('orv_configs2',{
+    notIncluded:DEFAULT_NOT_INCLUDED,respContratada:DEFAULT_RESP_CONTRATADA,
+    respContratante:DEFAULT_RESP_CONTRATANTE,costText:DEFAULT_COST_TEXT,validity:20,
+    empresa:{name:'Orvalho Consultoria Ambiental',cnpj:'',endereco:'Joinville/SC',contato:'+55 47 99245-4106',responsavel:'Bianca da Cruz Iéck'}
+  }));
+  const[sidebarOpen,setSidebarOpen]=useState(false);
+
+  useEffect(()=>{LS.set('orv_proposals2',proposals);},[proposals]);
+  useEffect(()=>{LS.set('orv_services2',services);},[services]);
+  useEffect(()=>{LS.set('orv_cnaes2',cnaes);},[cnaes]);
+  useEffect(()=>{LS.set('orv_fixedcosts2',fixedCosts);},[fixedCosts]);
+  useEffect(()=>{LS.set('orv_configs2',configs);},[configs]);
+
+  if(!authed) return <Login onLogin={()=>{setAuthed(true);LS.set('orv_auth2',true);}}/>;
+
+  const nav=[
+    {id:'dashboard',icon:'📊',label:'Dashboard'},
+    {id:'propostas',icon:'📋',label:'Gestão de Propostas'},
+    {id:'nova',icon:'✨',label:'Nova Proposta'},
+    {id:'configuracoes',icon:'⚙️',label:'Configurações'},
+  ];
+
+  return(
+    <div className="app">
+      <button className="hamburger" onClick={()=>setSidebarOpen(o=>!o)}>☰</button>
+      {sidebarOpen&&<div className="sidebar-backdrop" onClick={()=>setSidebarOpen(false)}/>}
+      <aside className={`sidebar${sidebarOpen?' open':''}`}>
+        <div className="sidebar-logo">
+          <div className="brand">Orvalho</div>
+          <div className="name">Propostas Comerciais</div>
+          <div className="tagline">Consultoria Ambiental</div>
+        </div>
+        <nav className="sidebar-nav">
+          {nav.map(n=>(
+            <button key={n.id} className={`nav-item${page===n.id?' active':''}`}
+              onClick={()=>{setPage(n.id);setSidebarOpen(false);}}>
+              <span className="icon">{n.icon}</span>{n.label}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-footer">
+          <div className="user"><strong>Bianca Iéck</strong>Orvalho Consultoria Ambiental</div>
+          <button className="btn btn-secondary btn-sm" style={{marginTop:8,width:'100%'}} onClick={()=>{setAuthed(false);LS.set('orv_auth2',false);}}>Sair</button>
+        </div>
+      </aside>
+      <main className="main">
+        {page==='dashboard'&&<DashboardPage proposals={proposals} services={services}/>}
+        {page==='propostas'&&<PropostasPage proposals={proposals} setProposals={setProposals} services={services} cnaes={cnaes} configs={configs} setPage={setPage}/>}
+        {page==='nova'&&<NovaPropostaPage proposals={proposals} setProposals={setProposals} services={services} cnaes={cnaes} configs={configs} fixedCosts={fixedCosts} onBack={()=>setPage('propostas')}/>}
+        {page==='configuracoes'&&<ConfigPage services={services} setServices={setServices} cnaes={cnaes} setCnaes={setCnaes} configs={configs} setConfigs={setConfigs} fixedCosts={fixedCosts} setFixedCosts={setFixedCosts}/>}
+      </main>
+    </div>
+  );
+}
+
+// ─── LOGIN ───────────────────────────────────────────────────────
+function Login({onLogin}){
+  const[u,su]=useState('');const[p,sp]=useState('');const[err,se]=useState('');
+  const go=()=>{if(u==='bianca'&&p==='orvalho2026')onLogin();else se('Usuário ou senha incorretos.');};
+  return(
+    <div className="login-wrap">
+      <div className="login-card">
+        <div className="login-logo">
+          <span className="orv-icon">🌿</span>
+          <h1>Orvalho</h1>
+          <p>Sistema de Propostas Comerciais</p>
+        </div>
+        {err&&<div className="alert alert-warning">{err}</div>}
+        <div className="form-group"><label className="form-label">Usuário</label><input className="form-control" value={u} onChange={e=>su(e.target.value)} placeholder="bianca" onKeyDown={e=>e.key==='Enter'&&go()}/></div>
+        <div className="form-group"><label className="form-label">Senha</label><input className="form-control" type="password" value={p} onChange={e=>sp(e.target.value)} placeholder="••••••••" onKeyDown={e=>e.key==='Enter'&&go()}/></div>
+        <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'11px'}} onClick={go}>Entrar</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────
+function DashboardPage({proposals,services}){
+  const statusMap={elaborando:'Elaborando',enviada:'Enviada',aprovada:'Aprovada',reprovada:'Reprovada',semresposta:'Sem Resposta',cancelada:'Cancelada'};
+  const byStatus=Object.entries(statusMap).map(([k,l])=>({label:l,count:proposals.filter(p=>p.status===k).length,key:k}));
+  const aprovadas=proposals.filter(p=>p.status==='aprovada');
+  const fat=aprovadas.reduce((s,p)=>s+(p.budget?.total||0),0);
+  const fatMeses={};
+  proposals.filter(p=>p.status==='aprovada').forEach(p=>{
+    if(!p.date) return;
+    const [y,m]=p.date.split('-');
+    const k=`${m}/${y}`;
+    fatMeses[k]=(fatMeses[k]||0)+(p.budget?.total||0);
+  });
+  const mesesKeys=Object.keys(fatMeses).sort((a,b)=>{const[ma,ya]=a.split('/');const[mb,yb]=b.split('/');return new Date(`${ya}-${ma}-01`)-new Date(`${yb}-${mb}-01`);});
+  const maxFat=Math.max(...Object.values(fatMeses),1);
+  // top serviços
+  const svcCount={};
+  proposals.forEach(p=>(p.selectedServices||[]).forEach(sid=>{svcCount[sid]=(svcCount[sid]||0)+1;}));
+  const topSvcs=Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxSvc=Math.max(...topSvcs.map(([,c])=>c),1);
+  // taxa fechamento
+  const enviadas=proposals.filter(p=>['enviada','aprovada','reprovada'].includes(p.status));
+  const txFech=enviadas.length>0?Math.round((aprovadas.length/enviadas.length)*100):0;
+
+  return(
+    <div>
+      <div className="page-header"><h2>Dashboard</h2><p>Análise e acompanhamento das propostas comerciais</p></div>
+      <div className="kpi-grid">
+        <div className="kpi-card"><div className="kpi-icon">📋</div><div className="kpi-value">{proposals.length}</div><div className="kpi-label">Total de propostas</div></div>
+        <div className="kpi-card blue"><div className="kpi-icon">✅</div><div className="kpi-value">{aprovadas.length}</div><div className="kpi-label">Aprovadas</div></div>
+        <div className="kpi-card yellow"><div className="kpi-icon">💰</div><div className="kpi-value">{fmtBRL(fat)}</div><div className="kpi-label">Faturamento aprovado</div></div>
+        <div className="kpi-card"><div className="kpi-icon">🎯</div><div className="kpi-value">{txFech}%</div><div className="kpi-label">Taxa de fechamento</div></div>
+      </div>
+      <div className="grid-2" style={{marginBottom:16}}>
+        <div className="card">
+          <div className="card-title">Por Status</div>
+          {byStatus.map(s=>(
+            <div key={s.key} style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+              <div style={{fontSize:13,flex:1,color:'var(--tx)'}}>{s.label}</div>
+              <div style={{flex:2,background:'var(--bg)',borderRadius:6,height:14,overflow:'hidden'}}>
+                <div style={{height:'100%',width:`${proposals.length?Math.round(s.count/proposals.length*100):0}%`,background:'var(--vl)',borderRadius:6,transition:'width .4s'}}/>
+              </div>
+              <div style={{fontSize:13,fontWeight:700,color:'var(--vd)',minWidth:24,textAlign:'right'}}>{s.count}</div>
+            </div>
+          ))}
+        </div>
+        <div className="card">
+          <div className="card-title">Serviços mais orçados</div>
+          {topSvcs.length===0?<div className="text-muted text-sm">Nenhuma proposta ainda.</div>:topSvcs.map(([sid,count])=>{
+            const svc=services.find(s=>s.id===sid);
+            return(
+              <div key={sid} style={{marginBottom:10}}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+                  <span style={{fontSize:11.5,color:'var(--tx)'}}>{svc?.name||sid}</span>
+                  <span style={{fontSize:12,fontWeight:700,color:'var(--vd)'}}>{count}</span>
+                </div>
+                <div style={{background:'var(--bg)',borderRadius:6,height:10,overflow:'hidden'}}>
+                  <div style={{height:'100%',width:`${Math.round(count/maxSvc*100)}%`,background:'var(--az)',borderRadius:6}}/>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {mesesKeys.length>0&&(
+        <div className="card">
+          <div className="card-title">Faturamento aprovado por mês</div>
+          <div className="dash-chart-bar">
+            {mesesKeys.map(k=>(
+              <div key={k} className="dash-bar-wrap">
+                <div className="dash-bar-val">{fmtBRL(fatMeses[k]).replace('R$','').trim()}</div>
+                <div className="dash-bar" style={{height:`${Math.round(fatMeses[k]/maxFat*100)}px`}}/>
+                <div className="dash-bar-label">{k}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── GESTÃO DE PROPOSTAS ────────────────────────────────────────
+function PropostasPage({proposals,setProposals,services,cnaes,configs,setPage}){
+  const[filter,setFilter]=useState({status:'',search:'',mes:'',ano:''});
+  const[viewProp,setViewProp]=useState(null);
+
+  const anosDisp=useMemo(()=>[...new Set(proposals.map(p=>p.date?.slice(0,4)).filter(Boolean))].sort().reverse(),[proposals]);
+  const mesesDisp=['01','02','03','04','05','06','07','08','09','10','11','12'];
+  const mesesNomes={
+    '01':'Janeiro','02':'Fevereiro','03':'Março','04':'Abril','05':'Maio','06':'Junho',
+    '07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'
+  };
+
+  const filtered=proposals.filter(p=>{
+    if(filter.status&&p.status!==filter.status) return false;
+    if(filter.mes&&p.date?.slice(5,7)!==filter.mes) return false;
+    if(filter.ano&&p.date?.slice(0,4)!==filter.ano) return false;
+    if(filter.search){const q=filter.search.toLowerCase();if(!p.client?.toLowerCase().includes(q)&&!p.number?.toLowerCase().includes(q)) return false;}
+    return true;
+  });
+
+  const statusMap={elaborando:{label:'Elaborando',cls:'badge-elaborando',emoji:'🟡'},enviada:{label:'Enviada',cls:'badge-enviada',emoji:'🔵'},aprovada:{label:'Aprovada',cls:'badge-aprovada',emoji:'🟢'},reprovada:{label:'Reprovada',cls:'badge-reprovada',emoji:'🔴'},semresposta:{label:'Sem resposta',cls:'badge-semresposta',emoji:'⚪'},cancelada:{label:'Cancelada',cls:'badge-cancelada',emoji:'⚫'}};
+  const isReminder=p=>{if(p.status!=='enviada'||!p.sentAt)return false;return(new Date()-new Date(p.sentAt))/86400000>=7;};
+  const del=id=>{if(confirm('Excluir proposta?'))setProposals(ps=>ps.filter(p=>p.id!==id));};
+  const dup=prop=>{const np={...prop,id:Date.now(),number:genProposalNumber(proposals,today()),date:today(),status:'elaborando',sentAt:null,approvedAt:null};setProposals(ps=>[np,...ps]);};
+  const changeStatus=(id,status)=>{setProposals(ps=>ps.map(p=>{if(p.id!==id)return p;const u={...p,status};if(status==='enviada'&&!p.sentAt)u.sentAt=today();if(status==='aprovada'&&!p.approvedAt)u.approvedAt=today();return u;}));};
+  const kpis={total:filtered.length,enviadas:filtered.filter(p=>p.status==='enviada').length,aprovadas:filtered.filter(p=>p.status==='aprovada').length,faturamento:filtered.filter(p=>p.status==='aprovada').reduce((s,p)=>s+(p.budget?.total||0),0)};
+
+  return(
+    <div>
+      <div className="page-header"><h2>Gestão de Propostas</h2><p>Acompanhe todas as propostas comerciais da Orvalho</p></div>
+      <div className="kpi-grid">
+        <div className="kpi-card"><div className="kpi-icon">📋</div><div className="kpi-value">{kpis.total}</div><div className="kpi-label">Exibindo</div></div>
+        <div className="kpi-card blue"><div className="kpi-icon">📤</div><div className="kpi-value">{kpis.enviadas}</div><div className="kpi-label">Enviadas</div></div>
+        <div className="kpi-card"><div className="kpi-icon">✅</div><div className="kpi-value">{kpis.aprovadas}</div><div className="kpi-label">Aprovadas</div></div>
+        <div className="kpi-card yellow"><div className="kpi-icon">💰</div><div className="kpi-value">{fmtBRL(kpis.faturamento)}</div><div className="kpi-label">Faturamento</div></div>
+      </div>
+      <div className="card">
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:16,alignItems:'center'}}>
+          <input className="form-control" style={{width:200}} placeholder="Buscar cliente ou nº..." value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))}/>
+          <select className="form-control" style={{width:150}} value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))}>
+            <option value="">Todos os status</option>
+            {Object.entries(statusMap).map(([k,v])=><option key={k} value={k}>{v.emoji} {v.label}</option>)}
+          </select>
+          <select className="form-control" style={{width:130}} value={filter.mes} onChange={e=>setFilter(f=>({...f,mes:e.target.value}))}>
+            <option value="">Todos os meses</option>
+            {mesesDisp.map(m=><option key={m} value={m}>{mesesNomes[m]}</option>)}
+          </select>
+          <select className="form-control" style={{width:100}} value={filter.ano} onChange={e=>setFilter(f=>({...f,ano:e.target.value}))}>
+            <option value="">Todos os anos</option>
+            {anosDisp.map(a=><option key={a} value={a}>{a}</option>)}
+          </select>
+          <div style={{marginLeft:'auto'}}>
+            <button className="btn btn-green" onClick={()=>setPage('nova')}>✨ Nova Proposta</button>
+          </div>
+        </div>
+        {filtered.length===0?(
+          <div className="empty-state">
+            <div className="icon">📋</div>
+            <h3>Nenhuma proposta encontrada</h3>
+            <p>Crie sua primeira proposta ou ajuste os filtros</p>
+            <button className="btn btn-primary" style={{marginTop:14}} onClick={()=>setPage('nova')}>Nova Proposta</button>
+          </div>
+        ):(
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Nº</th><th>Nome</th><th>Cliente</th><th>Serviços</th><th>Data</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody>
+                {filtered.map(p=>{
+                  const sm=statusMap[p.status]||statusMap.elaborando;
+                  const rem=isReminder(p);
+                  return(
+                    <tr key={p.id}>
+                      <td><strong style={{color:'var(--vd)'}}>{p.number}</strong></td>
+                      <td style={{maxWidth:160,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{p.proposalName||'—'}</td>
+                      <td>{p.client||'—'}</td>
+                      <td style={{maxWidth:180}}>
+                        {(p.selectedServices||[]).slice(0,2).map(sid=>{
+                          const svc=services.find(s=>s.id===sid);
+                          return <span key={sid} style={{display:'inline-block',background:'#f0f7e6',color:'#285d02',fontSize:10.5,padding:'2px 6px',borderRadius:10,marginRight:3,marginBottom:2}}>{(p.serviceTitles?.[sid]||svc?.name||sid).split(' ')[0]}</span>;
+                        })}
+                        {(p.selectedServices||[]).length>2&&<span style={{fontSize:10.5,color:'var(--txl)'}}>+{p.selectedServices.length-2}</span>}
+                      </td>
+                      <td style={{whiteSpace:'nowrap'}}>{fmtDate(p.date)}</td>
+                      <td><strong>{fmtBRL(p.budget?.total||0)}</strong></td>
+                      <td>
+                        <div style={{display:'flex',flexDirection:'column',gap:3}}>
+                          <span className={`badge ${sm.cls}`}>{sm.emoji} {sm.label}</span>
+                          {rem&&<span className="reminder-badge">⏰ Lembrete</span>}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="actions">
+                          <select className="form-control" style={{width:130,padding:'3px 7px',fontSize:12}} value={p.status} onChange={e=>changeStatus(p.id,e.target.value)}>
+                            {Object.entries(statusMap).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
+                          </select>
+                          <button className="btn-icon" title="Visualizar" onClick={()=>setViewProp(p)}>👁</button>
+                          <button className="btn-icon" title="Duplicar" onClick={()=>dup(p)}>📋</button>
+                          <button className="btn-icon" title="Gerar Word" onClick={()=>generateWord(p,services,configs)}>📄</button>
+                          <button className="btn-icon" title="Excluir" onClick={()=>del(p.id)} style={{color:'#b91c1c'}}>🗑</button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      {viewProp&&<ViewModal prop={viewProp} services={services} configs={configs} onClose={()=>setViewProp(null)} onGenWord={()=>generateWord(viewProp,services,configs)}/>}
+    </div>
+  );
+}
+
+// ─── NOVA PROPOSTA ───────────────────────────────────────────────
+function NovaPropostaPage({proposals,setProposals,services,cnaes,configs,fixedCosts,onBack}){
+  const blank={
+    id:Date.now(),number:'',date:today(),
+    proposalName:'',client:'',clientCnpj:'',clientContact:'',clientEmail:'',clientAddress:'',
+    status:'elaborando',sentAt:null,approvedAt:null,
+    selectedServices:[],serviceScopes:{},serviceTitles:{},
+    hasOtherService:false,otherServiceTitle:'',otherServiceScope:'',
+    objective:'',notIncluded:configs.notIncluded||DEFAULT_NOT_INCLUDED,
+    respContratada:configs.respContratada||DEFAULT_RESP_CONTRATADA,
+    respContratante:configs.respContratante||DEFAULT_RESP_CONTRATANTE,
+    prazoVisita:'',prazoEntrega:'',duracaoCampo:'',
+    paymentText:configs.costText||DEFAULT_COST_TEXT,
+    paymentMethods:['pix'],
+    validity:configs.validity||20,
+    parcels:[],
+    discount:0,
+    budget:{hh:0,fixedCosts:0,projectCosts:0,thirds:0,profit:10,cnaeId:'1',total:0,tax:0,profitVal:0,incluirCF:false},
+    budgetDetail:{horas:{visitaTecnica:0,tratamentoDados:0,montagemProcesso:0,confRelatorio:0,revisaoRelatorio:0,elaboracaoDesenhos:0,outrosCustos:0,horasAdm:0},valorHora:35,projectItems:[],thirdItems:[]},
+    notes:'',
+  };
+
+  const[form,setForm]=useState(()=>{
+    // generate number with today
+    const n=genProposalNumber(proposals,today());
+    return {...blank,number:n};
+  });
+  const[tab,setTab]=useState('cliente');
+  const[saved,setSaved]=useState(false);
+
+  // regenerate number when date changes
+  const updDate=val=>{
+    const newNum=genProposalNumber(proposals,val);
+    setForm(f=>({...f,date:val,number:newNum}));
+    setSaved(false);
+  };
+
+  const upd=(path,val)=>{
+    setForm(f=>{
+      const nf=JSON.parse(JSON.stringify(f));
+      const keys=path.split('.');let cur=nf;
+      for(let i=0;i<keys.length-1;i++) cur=cur[keys[i]];
+      cur[keys[keys.length-1]]=val;
+      return nf;
+    });
+    setSaved(false);
+  };
+
+  const toggleService=id=>{
+    setForm(f=>{
+      const sel=f.selectedServices.includes(id)?f.selectedServices.filter(s=>s!==id):[...f.selectedServices,id];
+      const svc=services.find(s=>s.id===id);
+      const scopes={...f.serviceScopes};const titles={...f.serviceTitles};
+      if(!f.selectedServices.includes(id)&&svc){scopes[id]=svc.scope;titles[id]=svc.name;}
+      return {...f,selectedServices:sel,serviceScopes:scopes,serviceTitles:titles};
+    });setSaved(false);
+  };
+
+  // Custos fixos mensais
+  const cfMensal=fixedCosts.reduce((s,c)=>s+(c.tipo==='anual'?c.valor/12:c.valor),0);
+
+  const calcBudget=f=>{
+    const d=f.budgetDetail;
+    const horaTotal=Object.values(d.horas||{}).reduce((s,v)=>s+(+v||0),0);
+    const hh=horaTotal*(+d.valorHora||35);
+    const proj=(d.projectItems||[]).reduce((s,i)=>s+(+i.qty||1)*(+i.unit||0),0);
+    const th=(d.thirdItems||[]).reduce((s,i)=>s+(+i.qty||1)*(+i.unit||0),0);
+    const cfAloc=f.budget.incluirCF?cfMensal*(horaTotal/160):0;
+    const cnae=cnaes.find(c=>c.id===f.budget.cnaeId)||cnaes[0];
+    const taxRate=cnae?.tax||0;
+    const profRate=(+f.budget.profit||0)/100;
+    const base=hh+cfAloc+proj+th;
+    const total=base/(1-taxRate-profRate)||base;
+    const tax=total*taxRate;
+    const profVal=total*profRate;
+    const discountAmt=total*((+f.discount||0)/100);
+    return {hh,proj,th,base,total,tax,profVal,taxRate,profRate,cfAloc,horaTotal,discountAmt,totalComDesconto:total-discountAmt};
+  };
+
+  const bc=calcBudget(form);
+
+  const save=()=>{
+    const bc2=calcBudget(form);
+    const fp={...form,budget:{...form.budget,total:bc2.total,tax:bc2.tax,profitVal:bc2.profVal,totalComDesconto:bc2.totalComDesconto}};
+    setProposals(ps=>{const ex=ps.findIndex(p=>p.id===fp.id);if(ex>=0){const n=[...ps];n[ex]=fp;return n;}return[fp,...ps];});
+    setSaved(true);setTimeout(()=>setSaved(false),2200);
+  };
+
+  const tabs=[
+    {id:'cliente',label:'1. Cliente'},
+    {id:'servicos',label:'2. Serviços'},
+    {id:'escopo',label:'3. Escopo'},
+    {id:'orcamento',label:'4. Orçamento'},
+    {id:'pagamento',label:'5. Pagamento'},
+    {id:'revisao',label:'6. Revisão'},
+  ];
+
+  return(
+    <div>
+      <div className="section-header">
+        <div><h2 style={{fontSize:22,color:'var(--vd)'}}>Nova Proposta</h2><p style={{color:'var(--txl)',fontSize:13}}>Nº {form.number} · {fmtDate(form.date)}</p></div>
+        <div style={{display:'flex',gap:8}}>
+          {saved&&<span className="badge" style={{background:'#dcfce7',color:'#166534',fontSize:13}}>✅ Salvo!</span>}
+          <button className="btn btn-secondary" onClick={onBack}>← Voltar</button>
+          <button className="btn btn-primary" onClick={save}>💾 Salvar</button>
+        </div>
+      </div>
+      <div className="tabs">{tabs.map(t=><button key={t.id} className={`tab${tab===t.id?' active':''}`} onClick={()=>setTab(t.id)}>{t.label}</button>)}</div>
+      {tab==='cliente'&&<TabCliente form={form} upd={upd} updDate={updDate}/>}
+      {tab==='servicos'&&<TabServicos form={form} services={services} toggleService={toggleService} upd={upd}/>}
+      {tab==='escopo'&&<TabEscopo form={form} services={services} upd={upd} configs={configs}/>}
+      {tab==='orcamento'&&<TabOrcamento form={form} upd={upd} bc={bc} cnaes={cnaes} fixedCosts={fixedCosts} cfMensal={cfMensal}/>}
+      {tab==='pagamento'&&<TabPagamento form={form} upd={upd} bc={bc}/>}
+      {tab==='revisao'&&<TabRevisao form={form} services={services} bc={bc} onSave={save} onGenerate={()=>{save();generateWord(form,services,configs);}}/>}
+    </div>
+  );
+}
+
+// TAB 1: CLIENTE
+function TabCliente({form,upd,updDate}){
+  return(
+    <div>
+      <div className="card mb-16">
+        <div className="card-title">Identificação da Proposta</div>
+        <div className="form-row cols-2">
+          <div className="form-group">
+            <label className="form-label">Data da Proposta <span>*</span></label>
+            <input type="date" className="form-control" value={form.date} onChange={e=>updDate(e.target.value)}/>
+            <div style={{fontSize:11.5,color:'var(--txl)',marginTop:4}}>O número da proposta é gerado automaticamente com base na data</div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Número da Proposta</label>
+            <input className="form-control" value={form.number} onChange={e=>upd('number',e.target.value)} style={{fontWeight:600,color:'var(--vd)'}}/>
+          </div>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Nome da Proposta Comercial <span>*</span></label>
+          <input className="form-control" value={form.proposalName} onChange={e=>upd('proposalName',e.target.value)} placeholder="Ex: Levantamento de Fauna e Flora — Empresa X"/>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Validade (dias)</label>
+          <input type="number" className="form-control" style={{maxWidth:120}} value={form.validity} onChange={e=>upd('validity',+e.target.value)} min={1}/>
+        </div>
+      </div>
+      <div className="card">
+        <div className="card-title">Dados do Cliente / Requerente</div>
+        <div className="form-row cols-2">
+          <div className="form-group"><label className="form-label">Nome do Cliente <span>*</span></label><input className="form-control" value={form.client} onChange={e=>upd('client',e.target.value)} placeholder="Razão social ou nome"/></div>
+          <div className="form-group"><label className="form-label">CNPJ / CPF</label><input className="form-control" value={form.clientCnpj} onChange={e=>upd('clientCnpj',e.target.value)} placeholder="00.000.000/0000-00"/></div>
+        </div>
+        <div className="form-row cols-2">
+          <div className="form-group"><label className="form-label">Responsável pelo contato</label><input className="form-control" value={form.clientContact} onChange={e=>upd('clientContact',e.target.value)}/></div>
+          <div className="form-group"><label className="form-label">E-mail</label><input className="form-control" type="email" value={form.clientEmail} onChange={e=>upd('clientEmail',e.target.value)}/></div>
+        </div>
+        <div className="form-group"><label className="form-label">Endereço / Localização</label><input className="form-control" value={form.clientAddress} onChange={e=>upd('clientAddress',e.target.value)} placeholder="Rua, número, município/UF"/></div>
+        <div className="form-group"><label className="form-label">Observações internas</label><textarea className="form-control" rows={2} value={form.notes} onChange={e=>upd('notes',e.target.value)} placeholder="Anotações que não aparecerão na proposta..."/></div>
+      </div>
+    </div>
+  );
+}
+
+// TAB 2: SERVIÇOS
+function TabServicos({form,services,toggleService,upd}){
+  return(
+    <div>
+      <div className="card mb-16">
+        <div className="card-title">Selecione os Serviços</div>
+        <div className="service-grid">
+          {services.map(s=>(
+            <div key={s.id} className={`service-chip${form.selectedServices.includes(s.id)?' selected':''}`} onClick={()=>toggleService(s.id)}>
+              <div className="check">{form.selectedServices.includes(s.id)?'✓':''}</div>
+              <span>{s.name}</span>
+            </div>
+          ))}
+          <div className={`service-chip${form.hasOtherService?' selected':''}`} onClick={()=>upd('hasOtherService',!form.hasOtherService)}>
+            <div className="check">{form.hasOtherService?'✓':''}</div>
+            <span>Outro serviço...</span>
+          </div>
+        </div>
+      </div>
+      {form.selectedServices.map(sid=>{
+        const svc=services.find(s=>s.id===sid);
+        return(
+          <div key={sid} className="card mb-16">
+            <div className="form-group">
+              <label className="form-label">Título do serviço (como aparecerá na proposta)</label>
+              <input className="form-control" value={form.serviceTitles?.[sid]||''} onChange={e=>upd(`serviceTitles.${sid}`,e.target.value)} placeholder={svc?.name}/>
+            </div>
+          </div>
+        );
+      })}
+      {form.hasOtherService&&(
+        <div className="card mb-16">
+          <div className="card-title">Outro Serviço</div>
+          <div className="form-group"><label className="form-label">Título do serviço</label><input className="form-control" value={form.otherServiceTitle} onChange={e=>upd('otherServiceTitle',e.target.value)} placeholder="Nome do serviço que aparecerá na proposta"/></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// TAB 3: ESCOPO
+function TabEscopo({form,services,upd}){
+  return(
+    <div>
+      <div className="card mb-16">
+        <div className="card-title">Objetivo da Proposta</div>
+        <textarea className="form-control" rows={3} value={form.objective} onChange={e=>upd('objective',e.target.value)} placeholder="Descreva o objetivo geral da proposta..."/>
+      </div>
+      {form.selectedServices.map(sid=>{
+        const svc=services.find(s=>s.id===sid);
+        const title=form.serviceTitles?.[sid]||svc?.name||sid;
+        return(
+          <div key={sid} className="card mb-16">
+            <div className="card-title">{title}</div>
+            <textarea className="form-control" rows={10} value={form.serviceScopes?.[sid]||''} onChange={e=>upd(`serviceScopes.${sid}`,e.target.value)}/>
+          </div>
+        );
+      })}
+      {form.hasOtherService&&(
+        <div className="card mb-16">
+          <div className="card-title">{form.otherServiceTitle||'Outro Serviço'}</div>
+          <textarea className="form-control" rows={8} value={form.otherServiceScope} onChange={e=>upd('otherServiceScope',e.target.value)} placeholder="Descreva o escopo deste serviço..."/>
+        </div>
+      )}
+      <div className="card mb-16">
+        <div className="card-title">Prazos</div>
+        <div className="form-row cols-3">
+          <div className="form-group">
+            <label className="form-label">Mobilização para campo</label>
+            <select className="form-control" value={form.prazoVisita} onChange={e=>upd('prazoVisita',e.target.value)}>
+              <option value="">Selecione...</option>
+              {PRAZO_VISITA_OPTS.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Entrega do laudo (dias úteis após campo)</label>
+            <input type="number" className="form-control" value={form.prazoEntrega} onChange={e=>upd('prazoEntrega',e.target.value)} min={1} placeholder="Ex: 30"/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Duração das atividades em campo</label>
+            <input className="form-control" value={form.duracaoCampo} onChange={e=>upd('duracaoCampo',e.target.value)} placeholder="Ex: 5 dias corridos para fauna + 3 para flora"/>
+          </div>
+        </div>
+      </div>
+      <div className="card mb-16">
+        <div className="card-title">Não incluso no escopo</div>
+        <textarea className="form-control" rows={6} value={form.notIncluded} onChange={e=>upd('notIncluded',e.target.value)}/>
+      </div>
+      <div className="card mb-16">
+        <div className="card-title">Responsabilidades da Contratada (Orvalho)</div>
+        <textarea className="form-control" rows={5} value={form.respContratada} onChange={e=>upd('respContratada',e.target.value)}/>
+      </div>
+      <div className="card">
+        <div className="card-title">Responsabilidades da Contratante (Cliente)</div>
+        <textarea className="form-control" rows={4} value={form.respContratante} onChange={e=>upd('respContratante',e.target.value)}/>
+      </div>
+    </div>
+  );
+}
+
+// TAB 4: ORÇAMENTO
+function TabOrcamento({form,upd,bc,cnaes,fixedCosts,cfMensal}){
+  const d=form.budgetDetail;
+  const horaItems=[
+    {key:'visitaTecnica',label:'Visita Técnica em Campo'},
+    {key:'tratamentoDados',label:'Tratamento dos Dados'},
+    {key:'montagemProcesso',label:'Montagem do Processo'},
+    {key:'confRelatorio',label:'Confecção de Relatório'},
+    {key:'revisaoRelatorio',label:'Revisão de Relatório'},
+    {key:'elaboracaoDesenhos',label:'Elaboração de Desenhos/Mapas'},
+    {key:'outrosCustos',label:'Outros (campo)'},
+    {key:'horasAdm',label:'Horas Administrativas'},
+  ];
+
+  const addProjItem=()=>upd('budgetDetail.projectItems',[...(d.projectItems||[]),{id:Date.now(),desc:'',qty:1,unit:0,custom:''}]);
+  const remProjItem=id=>upd('budgetDetail.projectItems',d.projectItems.filter(i=>i.id!==id));
+  const updProjItem=(id,k,v)=>upd('budgetDetail.projectItems',d.projectItems.map(i=>i.id===id?{...i,[k]:v}:i));
+
+  const addThirdItem=()=>upd('budgetDetail.thirdItems',[...(d.thirdItems||[]),{id:Date.now(),service:'',name:'',qty:1,unit:0,custom:''}]);
+  const remThirdItem=id=>upd('budgetDetail.thirdItems',d.thirdItems.filter(i=>i.id!==id));
+  const updThirdItem=(id,k,v)=>upd('budgetDetail.thirdItems',d.thirdItems.map(i=>i.id===id?{...i,[k]:v}:i));
+
+  return(
+    <div>
+      {/* TOTAL */}
+      <div style={{background:'var(--vd)',color:'#fff',borderRadius:'var(--r)',padding:'18px 22px',marginBottom:16}}>
+        <div style={{fontSize:12.5,opacity:.7}}>Valor Total da Proposta</div>
+        <div style={{fontSize:30,fontFamily:"'Playfair Display',serif",fontWeight:700}}>{fmtBRL(bc.total)}</div>
+        {form.discount>0&&<div style={{fontSize:14,color:'#9abf4a',marginTop:4}}>Com desconto de {form.discount}%: <strong>{fmtBRL(bc.totalComDesconto)}</strong></div>}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:10,marginTop:12}}>
+          {[['HH',bc.hh],['Proj.',bc.proj],['Terceiros',bc.th],['CF Alocado',bc.cfAloc]].map(([l,v])=>(
+            <div key={l} style={{background:'rgba(255,255,255,.1)',borderRadius:6,padding:'7px 10px'}}>
+              <div style={{fontSize:10.5,opacity:.7}}>{l}</div><div style={{fontSize:13,fontWeight:600}}>{fmtBRL(v)}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:8}}>
+          <div style={{background:'rgba(255,255,255,.1)',borderRadius:6,padding:'7px 10px'}}>
+            <div style={{fontSize:10.5,opacity:.7}}>Impostos ({(bc.taxRate*100).toFixed(1)}%)</div><div style={{fontSize:13,fontWeight:600}}>{fmtBRL(bc.tax)}</div>
+          </div>
+          <div style={{background:'rgba(154,191,74,.2)',borderRadius:6,padding:'7px 10px'}}>
+            <div style={{fontSize:10.5,opacity:.7}}>Lucro da empresa ({form.budget.profit}%)</div><div style={{fontSize:13,fontWeight:600,color:'#9abf4a'}}>{fmtBRL(bc.profVal)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid-2">
+        <div>
+          {/* CNAE */}
+          <div className="card mb-16">
+            <div className="card-title">CNAE e Impostos</div>
+            {cnaes.map(c=>(
+              <label key={c.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',cursor:'pointer',borderBottom:'1px solid var(--bd)'}}>
+                <input type="radio" name="cnae" checked={form.budget.cnaeId===c.id} onChange={()=>upd('budget.cnaeId',c.id)}/>
+                <div><div style={{fontSize:13,fontWeight:600}}>{c.code}</div><div style={{fontSize:11.5,color:'var(--txl)'}}>{c.desc} — {(c.tax*100).toFixed(1)}%</div></div>
+              </label>
+            ))}
+          </div>
+          {/* LUCRO */}
+          <div className="card mb-16">
+            <div className="card-title">Margem de Lucro (%)</div>
+            <div style={{display:'flex',alignItems:'center',gap:12}}>
+              <input type="number" className="form-control" value={form.budget.profit} onChange={e=>upd('budget.profit',e.target.value)} min={0} max={100} style={{maxWidth:110}}/>
+              <span style={{fontSize:13,color:'var(--vd)',fontWeight:600}}>{fmtBRL(bc.profVal)} = lucro da empresa</span>
+            </div>
+          </div>
+          {/* DESCONTO */}
+          <div className="card mb-16">
+            <div className="card-title">Desconto</div>
+            <div style={{display:'flex',alignItems:'center',gap:12}}>
+              <input type="number" className="form-control" value={form.discount||0} onChange={e=>upd('discount',+e.target.value)} min={0} max={100} style={{maxWidth:110}} placeholder="0"/>
+              <span style={{fontSize:12.5,color:'var(--txl)'}}>% de desconto</span>
+              {form.discount>0&&<span style={{fontSize:13,fontWeight:600,color:'#b91c1c'}}>−{fmtBRL(bc.discountAmt)} → {fmtBRL(bc.totalComDesconto)}</span>}
+            </div>
+            {form.discount>0&&<div style={{fontSize:11.5,color:'var(--txl)',marginTop:6}}>⚠️ Desconto registrado internamente. O documento Word mostrará o valor final.</div>}
+          </div>
+          {/* CUSTOS FIXOS */}
+          <div className="card">
+            <div className="card-title">Custos Fixos da Empresa</div>
+            <div style={{fontSize:12.5,color:'var(--txl)',marginBottom:10}}>Total mensal: <strong style={{color:'var(--vd)'}}>{fmtBRL(cfMensal)}</strong></div>
+            <table className="cf-table" style={{marginBottom:10}}>
+              <thead><tr><th>Item</th><th>Tipo</th><th>Mensal</th></tr></thead>
+              <tbody>
+                {fixedCosts.map(c=>(
+                  <tr key={c.id}><td>{c.nome}</td><td>{c.tipo}</td><td>{fmtBRL(c.tipo==='anual'?c.valor/12:c.valor)}</td></tr>
+                ))}
+              </tbody>
+            </table>
+            <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontSize:13,marginBottom:8}}>
+              <input type="checkbox" checked={!!form.budget.incluirCF} onChange={e=>upd('budget.incluirCF',e.target.checked)}/>
+              Incluir custos fixos proporcionais neste orçamento
+            </label>
+            {form.budget.incluirCF&&(
+              <div style={{fontSize:12.5,color:'var(--vd)',fontWeight:600}}>
+                CF alocado = {fmtBRL(cfMensal)} × ({bc.horaTotal}h ÷ 160h) = {fmtBRL(bc.cfAloc)}
+              </div>
+            )}
+          </div>
+        </div>
+        <div>
+          {/* HORA/HOMEM */}
+          <div className="card">
+            <div className="card-title">Hora/Homem</div>
+            <div className="form-group">
+              <label className="form-label">Valor por Hora (R$)</label>
+              <input type="number" className="form-control" value={d.valorHora} onChange={e=>upd('budgetDetail.valorHora',e.target.value)} style={{maxWidth:130}}/>
+            </div>
+            {horaItems.map(h=>(
+              <div key={h.key} className="calc-row">
+                <span className="calc-label">{h.label}</span>
+                <input type="number" className="form-control calc-input" value={d.horas?.[h.key]||0} onChange={e=>upd(`budgetDetail.horas.${h.key}`,+e.target.value)} min={0}/>
+                <span className="calc-value">{fmtBRL((d.horas?.[h.key]||0)*(+d.valorHora||35))}</span>
+              </div>
+            ))}
+            <div style={{borderTop:'1px solid var(--bd)',paddingTop:9,marginTop:6,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <span style={{fontWeight:600,fontSize:13}}>Total HH — {bc.horaTotal}h</span>
+              <span style={{fontWeight:700,color:'var(--vd)',fontSize:14}}>{fmtBRL(bc.hh)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CUSTOS DO PROJETO */}
+      <div className="card mb-16" style={{marginTop:14}}>
+        <div className="flex-between mb-16">
+          <div className="card-title" style={{marginBottom:0}}>Custos do Projeto</div>
+          <button className="btn btn-secondary btn-sm" onClick={addProjItem}>+ Adicionar</button>
+        </div>
+        {(d.projectItems||[]).map(i=>(
+          <div key={i.id} style={{display:'grid',gridTemplateColumns:'2fr 80px 110px auto',gap:10,marginBottom:8,alignItems:'center'}}>
+            <div>
+              <select className="form-control" value={i.desc} onChange={e=>updProjItem(i.id,'desc',e.target.value)} style={{marginBottom:i.desc==='Outro'?6:0}}>
+                <option value="">Selecione...</option>
+                {CUSTOS_PROJETO_LISTA.map(o=><option key={o} value={o}>{o}</option>)}
+              </select>
+              {i.desc==='Outro'&&<input className="form-control" value={i.custom||''} onChange={e=>updProjItem(i.id,'custom',e.target.value)} placeholder="Qual item?"/>}
+            </div>
+            <input type="number" className="form-control" value={i.qty||1} onChange={e=>updProjItem(i.id,'qty',+e.target.value)} placeholder="Qtde" min={0}/>
+            <input type="number" className="form-control" value={i.unit||0} onChange={e=>updProjItem(i.id,'unit',+e.target.value)} placeholder="Unitário R$" min={0}/>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <span style={{fontWeight:600,fontSize:12.5,color:'var(--vd)',minWidth:80,textAlign:'right'}}>{fmtBRL((i.qty||1)*(i.unit||0))}</span>
+              <button className="btn-icon" onClick={()=>remProjItem(i.id)}>🗑</button>
+            </div>
+          </div>
+        ))}
+        {(d.projectItems||[]).length>0&&<div style={{textAlign:'right',fontWeight:700,color:'var(--vd)',marginTop:6}}>Total: {fmtBRL(bc.proj)}</div>}
+      </div>
+
+      {/* TERCEIROS */}
+      <div className="card">
+        <div className="flex-between mb-16">
+          <div>
+            <div className="card-title" style={{marginBottom:2}}>Terceiros (minha equipe contratada)</div>
+            <div style={{fontSize:11.5,color:'var(--txl)'}}>Estes valores entram no total da nota fiscal e têm imposto incidente.</div>
+          </div>
+          <button className="btn btn-secondary btn-sm" onClick={addThirdItem}>+ Adicionar</button>
+        </div>
+        {(d.thirdItems||[]).map(i=>(
+          <div key={i.id} style={{display:'grid',gridTemplateColumns:'2fr 1.2fr 80px 110px auto',gap:10,marginBottom:8,alignItems:'center'}}>
+            <div>
+              <select className="form-control" value={i.service||''} onChange={e=>updThirdItem(i.id,'service',e.target.value)} style={{marginBottom:i.service==='Outro'?6:0}}>
+                <option value="">Selecione...</option>
+                {TERCEIROS_LISTA.map(o=><option key={o} value={o}>{o}</option>)}
+              </select>
+              {i.service==='Outro'&&<input className="form-control" value={i.custom||''} onChange={e=>updThirdItem(i.id,'custom',e.target.value)} placeholder="Qual profissional?"/>}
+            </div>
+            <input className="form-control" value={i.name||''} onChange={e=>updThirdItem(i.id,'name',e.target.value)} placeholder="Nome/empresa"/>
+            <input type="number" className="form-control" value={i.qty||1} onChange={e=>updThirdItem(i.id,'qty',+e.target.value)} min={0} placeholder="Qtde"/>
+            <input type="number" className="form-control" value={i.unit||0} onChange={e=>updThirdItem(i.id,'unit',+e.target.value)} placeholder="Unitário R$" min={0}/>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <span style={{fontWeight:600,fontSize:12.5,color:'var(--vd)',minWidth:80,textAlign:'right'}}>{fmtBRL((i.qty||1)*(i.unit||0))}</span>
+              <button className="btn-icon" onClick={()=>remThirdItem(i.id)}>🗑</button>
+            </div>
+          </div>
+        ))}
+        {(d.thirdItems||[]).length>0&&<div style={{textAlign:'right',fontWeight:700,color:'var(--vd)',marginTop:6}}>Total: {fmtBRL(bc.th)}</div>}
+      </div>
+    </div>
+  );
+}
+
+// TAB 5: PAGAMENTO
+function TabPagamento({form,upd,bc}){
+  const total=form.discount>0?bc.totalComDesconto:bc.total;
+
+  const addParcel=()=>upd('parcels',[...form.parcels,{id:Date.now(),label:'',pct:0,value:0,quando:''}]);
+  const remParcel=id=>upd('parcels',form.parcels.filter(p=>p.id!==id));
+  const updParcel=(id,k,v)=>{
+    const ps=form.parcels.map(p=>{
+      if(p.id!==id)return p;
+      const u={...p,[k]:v};
+      if(k==='pct') u.value=(total*(+v/100)).toFixed(2);
+      if(k==='value') u.pct=total>0?((+v/total)*100).toFixed(1):0;
+      return u;
+    });
+    upd('parcels',ps);
+  };
+
+  const totalPct=form.parcels.reduce((s,p)=>s+(+p.pct||0),0);
+  const methods=[{id:'pix',label:'Pix'},{id:'boleto',label:'Boleto Bancário'},{id:'deposito',label:'Depósito Bancário'},{id:'transferencia',label:'Transferência Bancária'}];
+  const toggleMethod=m=>{const cur=form.paymentMethods||[];upd('paymentMethods',cur.includes(m)?cur.filter(x=>x!==m):[...cur,m]);};
+
+  return(
+    <div>
+      <div className="card mb-16">
+        <div className="card-title">Texto sobre o que está incluso no valor</div>
+        <textarea className="form-control" rows={4} value={form.paymentText} onChange={e=>upd('paymentText',e.target.value)}/>
+      </div>
+      <div className="card mb-16">
+        <div className="flex-between mb-16">
+          <div>
+            <div className="card-title" style={{marginBottom:0}}>Parcelamento</div>
+            <div style={{fontSize:12.5,color:'var(--txl)',marginTop:3}}>Valor base: <strong>{fmtBRL(total)}</strong>{form.discount>0&&<span style={{color:'var(--vd)'}}> (com {form.discount}% desconto)</span>}</div>
+          </div>
+          <button className="btn btn-secondary btn-sm" onClick={addParcel}>+ Parcela</button>
+        </div>
+        {form.parcels.length===0&&<div className="alert alert-info">Adicione parcelas para configurar as condições de pagamento.</div>}
+        {form.parcels.map((p,i)=>(
+          <div key={p.id} style={{display:'grid',gridTemplateColumns:'160px 130px 140px 1fr auto',gap:8,marginBottom:10,alignItems:'center'}}>
+            {/* Nº da parcela — lista suspensa */}
+            <div>
+              <select className="form-control" value={p.labelOpt||''} onChange={e=>{const v=e.target.value;updParcel(p.id,'labelOpt',v);if(v!=='Outro') updParcel(p.id,'label',v);}} style={{fontSize:13,fontWeight:600,marginBottom:(p.labelOpt==='Outro')?5:0}}>
+                <option value="">Selecione...</option>
+                <option value="À vista">À vista</option>
+                {Array.from({length:24},(_,k)=>(<option key={k+1} value={`${k+1}ª Parcela`}>{k+1}ª Parcela</option>))}
+                <option value="Outro">Outro...</option>
+              </select>
+              {p.labelOpt==='Outro'&&<input className="form-control" value={p.label||''} onChange={e=>updParcel(p.id,'label',e.target.value)} placeholder="Descreva a condição..." style={{fontSize:13,marginTop:4}}/>}
+            </div>
+            {/* % — campo largo e legível */}
+            <div style={{display:'flex',alignItems:'center',gap:0}}>
+              <span style={{background:'var(--bg)',border:'1px solid var(--bd)',borderRight:'none',borderRadius:'var(--rs) 0 0 var(--rs)',padding:'9px 10px',fontSize:14,color:'var(--txl)',fontWeight:600}}>%</span>
+              <input type="number" className="form-control" value={p.pct} onChange={e=>updParcel(p.id,'pct',e.target.value)} min={0} max={100} step={0.1}
+                style={{fontSize:15,fontWeight:700,borderRadius:'0 var(--rs) var(--rs) 0',textAlign:'center',width:'100%',paddingLeft:6,paddingRight:6}}/>
+            </div>
+            {/* Valor calculado */}
+            <div style={{fontSize:14,fontWeight:700,color:'var(--vd)',textAlign:'center',background:'#f0f7e6',padding:'9px 8px',borderRadius:'var(--rs)',border:'1px solid #d0e8b0'}}>{fmtBRL(+p.value)}</div>
+            {/* Quando */}
+            <select className="form-control" value={p.quando||''} onChange={e=>updParcel(p.id,'quando',e.target.value)} style={{fontSize:12.5}}>
+              <option value="">Quando? (opcional)</option>
+              {PARCELA_QUANDO_OPTS.map(o=><option key={o} value={o}>{o}</option>)}
+            </select>
+            <button className="btn-icon" onClick={()=>remParcel(p.id)}>🗑</button>
+          </div>
+        ))}
+        {form.parcels.length>0&&(
+          <div style={{display:'flex',justifyContent:'space-between',borderTop:'1px solid var(--bd)',paddingTop:9,marginTop:6}}>
+            <span style={{fontWeight:600,fontSize:13}}>Total: {totalPct.toFixed(1)}%</span>
+            <span style={{fontWeight:700,color:'var(--vd)'}}>{fmtBRL(form.parcels.reduce((s,p)=>s+(+p.value||0),0))}</span>
+          </div>
+        )}
+        {Math.abs(totalPct-100)>0.5&&form.parcels.length>0&&<div className="alert alert-warning mt-12">As parcelas somam {totalPct.toFixed(1)}% — ajuste para totalizar 100%.</div>}
+      </div>
+      <div className="card">
+        <div className="card-title">Formas de Pagamento Aceitas</div>
+        <div style={{display:'flex',flexWrap:'wrap',gap:9}}>
+          {methods.map(m=>(
+            <label key={m.id} style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',padding:'8px 13px',border:'1.5px solid',borderRadius:'var(--rs)',fontSize:13.5,borderColor:(form.paymentMethods||[]).includes(m.id)?'var(--vl)':'var(--bd)',background:(form.paymentMethods||[]).includes(m.id)?'rgba(154,191,74,.08)':'#fff'}}>
+              <input type="checkbox" checked={(form.paymentMethods||[]).includes(m.id)} onChange={()=>toggleMethod(m.id)}/>{m.label}
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// TAB 6: REVISÃO
+function TabRevisao({form,services,bc,onSave,onGenerate}){
+  const[generating,setGenerating]=useState(false);
+  const missings=[];
+  if(!form.client) missings.push('Nome do cliente');
+  if(!form.proposalName) missings.push('Nome da proposta');
+  if(form.selectedServices.length===0&&!form.hasOtherService) missings.push('Serviços selecionados');
+  if(bc.total<=0) missings.push('Valor do orçamento');
+
+  const handleGenerate=async()=>{
+    setGenerating(true);
+    try{await onGenerate();}catch(e){}finally{setGenerating(false);}
+  };
+
+  const total=form.discount>0?bc.totalComDesconto:bc.total;
+  const horaTotal=Object.values(form.budgetDetail?.horas||{}).reduce((s,v)=>s+(+v||0),0);
+
+  return(
+    <div>
+      {missings.length>0&&<div className="alert alert-warning"><strong>Campos pendentes:</strong> {missings.join(', ')}</div>}
+      {missings.length===0&&<div className="alert alert-success">✅ Proposta completa e pronta para gerar!</div>}
+      <div className="card mb-16">
+        <div className="card-title">Resumo da Proposta</div>
+        <table style={{width:'100%',fontSize:13.5}}>
+          <tbody>
+            {[['Nº',form.number],['Nome',form.proposalName],['Cliente',form.client||'—'],['Data',fmtDate(form.date)],['Validade',`${form.validity} dias`]].map(([l,v])=>(
+              <tr key={l} style={{borderBottom:'1px solid var(--bd)'}}><td style={{padding:'8px 0',color:'var(--txl)',width:150}}>{l}</td><td style={{padding:'8px 0',fontWeight:500}}>{v}</td></tr>
+            ))}
+            <tr style={{borderBottom:'1px solid var(--bd)'}}><td style={{padding:'8px 0',color:'var(--txl)'}}>Serviços</td><td style={{padding:'8px 0'}}>{form.selectedServices.map(id=>services.find(s=>s.id===id)?.name).join(', ')||(form.hasOtherService?form.otherServiceTitle:'')||'—'}</td></tr>
+            <tr style={{borderBottom:'1px solid var(--bd)'}}><td style={{padding:'8px 0',color:'var(--txl)'}}>Valor Total</td><td style={{padding:'8px 0',fontWeight:700,fontSize:16,color:'var(--vd)'}}>{fmtBRL(bc.total)}{form.discount>0&&<span style={{fontSize:13,color:'#b91c1c',marginLeft:8}}>→ com desconto: {fmtBRL(total)}</span>}</td></tr>
+            <tr style={{borderBottom:'1px solid var(--bd)'}}><td style={{padding:'8px 0',color:'var(--txl)'}}>Impostos</td><td style={{padding:'8px 0'}}>{fmtBRL(bc.tax)} ({(bc.taxRate*100).toFixed(1)}%)</td></tr>
+            <tr style={{borderBottom:'1px solid var(--bd)'}}><td style={{padding:'8px 0',color:'var(--txl)'}}>Lucro da empresa</td><td style={{padding:'8px 0',color:'var(--vd)',fontWeight:600}}>{fmtBRL(bc.profVal)} ({form.budget.profit}%)</td></tr>
+            <tr><td style={{padding:'8px 0',color:'var(--txl)'}}>Minha remuneração (HH)</td><td style={{padding:'8px 0',fontWeight:700,color:'var(--az)',fontSize:15}}>{horaTotal}h × {fmtBRL(+form.budgetDetail?.valorHora||35)}/h = <strong>{fmtBRL(bc.hh)}</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      {form.parcels.length>0&&(
+        <div className="card mb-16">
+          <div className="card-title">Condições de Pagamento</div>
+          {form.parcels.map((p,i)=>(
+            <div key={p.id} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--bd)'}}>
+              <span>{p.label||`Parcela ${i+1}`}</span>
+              <div style={{textAlign:'right'}}><span style={{fontWeight:600}}>{fmtBRL(+p.value)}</span>{p.quando&&<span style={{fontSize:12,color:'var(--txl)',marginLeft:8}}>— {p.quando}</span>}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{display:'flex',gap:12,justifyContent:'flex-end'}}>
+        <button className="btn btn-secondary" onClick={onSave}>💾 Salvar Rascunho</button>
+        <button className="btn btn-primary" onClick={handleGenerate} disabled={missings.length>0||generating}>{generating?'⏳ Gerando...':'📄 Salvar e Gerar Word'}</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── VIEW MODAL ──────────────────────────────────────────────────
+function ViewModal({prop,services,configs,onClose,onGenWord}){
+  return(
+    <div className="modal-overlay" onClick={e=>{if(e.target.className==='modal-overlay')onClose();}}>
+      <div className="modal">
+        <div className="modal-header"><h3>📋 {prop.number} — {prop.proposalName||prop.client}</h3><button className="btn-icon" onClick={onClose}>✕</button></div>
+        <div className="modal-body">
+          <div className="form-row cols-2" style={{marginBottom:12}}>
+            <div><strong>Cliente:</strong> {prop.client}</div>
+            <div><strong>Data:</strong> {fmtDate(prop.date)}</div>
+          </div>
+          <div className="divider"/>
+          <div><strong>Serviços:</strong></div>
+          <div style={{marginTop:8}}>{(prop.selectedServices||[]).map(id=>{const s=services.find(x=>x.id===id);return <span key={id} className="badge" style={{background:'#f0f7e6',color:'var(--vd)',marginRight:6,marginBottom:6}}>{prop.serviceTitles?.[id]||s?.name||id}</span>})}</div>
+          {prop.hasOtherService&&prop.otherServiceTitle&&<span className="badge" style={{background:'#f0f7e6',color:'var(--vd)'}}>{prop.otherServiceTitle}</span>}
+          <div className="divider"/>
+          <div className="form-row cols-2">
+            <div><strong>Valor:</strong> <span style={{fontSize:17,color:'var(--vd)',fontWeight:700}}>{fmtBRL(prop.budget?.total||0)}</span>{prop.discount>0&&<span style={{fontSize:13,color:'#b91c1c',marginLeft:8}}>→ desconto {prop.discount}%: {fmtBRL(prop.budget?.totalComDesconto||0)}</span>}</div>
+            <div><strong>Validade:</strong> {prop.validity||20} dias</div>
+          </div>
+          {prop.prazoVisita&&<div style={{marginTop:8}}><strong>Mobilização para campo:</strong> {PRAZO_VISITA_OPTS.find(o=>o.value===prop.prazoVisita)?.label||prop.prazoVisita}</div>}
+          {prop.prazoEntrega&&<div><strong>Entrega do laudo:</strong> {prop.prazoEntrega} dias úteis após campo</div>}
+          {(prop.parcels||[]).length>0&&<>
+            <div className="divider"/>
+            <div><strong>Parcelas:</strong></div>
+            {prop.parcels.map((p,i)=><div key={p.id} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid var(--bd)'}}><span>{p.label||`Parcela ${i+1}`}{p.quando&&<span style={{fontSize:12,color:'var(--txl)'}}> — {p.quando}</span>}</span><strong>{fmtBRL(+p.value)}</strong></div>)}
+          </>}
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>Fechar</button>
+          <button className="btn btn-primary" onClick={onGenWord}>📄 Gerar Word</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── CONFIG PAGE ─────────────────────────────────────────────────
+function ConfigPage({services,setServices,cnaes,setCnaes,configs,setConfigs,fixedCosts,setFixedCosts}){
+  const[tab,setTab]=useState('servicos');
+  const[editSvc,setEditSvc]=useState(null);
+  const[newSvc,setNewSvc]=useState({id:'',name:'',cnae:'1',scope:''});
+
+  const addCnae=()=>setCnaes(cs=>[...cs,{id:Date.now().toString(),code:'',desc:'',tax:0}]);
+  const updCnae=(id,k,v)=>setCnaes(cs=>cs.map(c=>c.id===id?{...c,[k]:v}:c));
+  const delCnae=id=>{if(confirm('Excluir CNAE?'))setCnaes(cs=>cs.filter(c=>c.id!==id));};
+
+  // Custos Fixos
+  const addCF=()=>setFixedCosts(cf=>[...cf,{id:Date.now(),nome:'',valor:0,tipo:'mensal'}]);
+  const updCF=(id,k,v)=>setFixedCosts(cf=>cf.map(c=>c.id===id?{...c,[k]:v}:c));
+  const delCF=id=>{if(confirm('Excluir?'))setFixedCosts(cf=>cf.filter(c=>c.id!==id));};
+  const cfMensal=fixedCosts.reduce((s,c)=>s+(c.tipo==='anual'?c.valor/12:c.valor),0);
+
+  return(
+    <div>
+      <div className="page-header"><h2>Configurações</h2><p>Personalize serviços, CNAEs, textos padrão e dados da empresa</p></div>
+      <div className="tabs" style={{marginBottom:18}}>
+        {[{id:'servicos',label:'Serviços'},{id:'cnaes',label:'CNAE / Impostos'},{id:'custosfixos',label:'Custos Fixos'},{id:'textos',label:'Textos Padrão'},{id:'empresa',label:'Empresa'}].map(t=>(
+          <button key={t.id} className={`tab${tab===t.id?' active':''}`} onClick={()=>setTab(t.id)}>{t.label}</button>
+        ))}
+      </div>
+      {tab==='servicos'&&(
+        <div>
+          {editSvc&&(
+            <div className="card mb-16" style={{border:'2px solid var(--vl)'}}>
+              <div className="card-title">Editando: {editSvc.name}</div>
+              <div className="form-group"><label className="form-label">Nome</label><input className="form-control" value={editSvc.name} onChange={e=>setEditSvc(s=>({...s,name:e.target.value}))}/></div>
+              <div className="form-group"><label className="form-label">CNAE padrão</label>
+                <select className="form-control" value={editSvc.cnae} onChange={e=>setEditSvc(s=>({...s,cnae:e.target.value}))}>
+                  {cnaes.map(c=><option key={c.id} value={c.id}>{c.code}</option>)}
+                </select>
+              </div>
+              <div className="form-group"><label className="form-label">Escopo padrão</label><textarea className="form-control" rows={8} value={editSvc.scope} onChange={e=>setEditSvc(s=>({...s,scope:e.target.value}))}/></div>
+              <div style={{display:'flex',gap:8}}>
+                <button className="btn btn-primary" onClick={()=>{setServices(ss=>ss.map(s=>s.id===editSvc.id?editSvc:s));setEditSvc(null);}}>💾 Salvar</button>
+                <button className="btn btn-secondary" onClick={()=>setEditSvc(null)}>Cancelar</button>
+              </div>
+            </div>
+          )}
+          <div className="card">
+            <div className="flex-between mb-16">
+              <div className="card-title" style={{marginBottom:0}}>Serviços cadastrados</div>
+              <button className="btn btn-secondary btn-sm" onClick={()=>{const id='svc_'+Date.now();setNewSvc({id,name:'',cnae:'1',scope:''});setEditSvc({id,name:'',cnae:'1',scope:''});setServices(ss=>[...ss,{id,name:'Novo Serviço',cnae:'1',scope:''}]);}}>+ Novo Serviço</button>
+            </div>
+            {services.map(s=>(
+              <div key={s.id} className="config-item">
+                <div><div style={{fontWeight:600,fontSize:13.5}}>{s.name}</div><div style={{fontSize:12,color:'var(--txl)'}}>{cnaes.find(c=>c.id===s.cnae)?.code||''}</div></div>
+                <div style={{display:'flex',gap:6}}>
+                  <button className="btn btn-secondary btn-sm" onClick={()=>setEditSvc({...s})}>✏️ Editar</button>
+                  <button className="btn btn-danger btn-sm" onClick={()=>{if(confirm('Excluir serviço?'))setServices(ss=>ss.filter(x=>x.id!==s.id));}}>🗑</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {tab==='cnaes'&&(
+        <div className="card">
+          <div className="flex-between mb-16">
+            <div className="card-title" style={{marginBottom:0}}>CNAE e Alíquotas</div>
+            <button className="btn btn-secondary btn-sm" onClick={addCnae}>+ Adicionar CNAE</button>
+          </div>
+          {cnaes.map(c=>(
+            <div key={c.id} style={{display:'grid',gridTemplateColumns:'1fr 2fr 100px auto',gap:10,marginBottom:10,alignItems:'center'}}>
+              <input className="form-control" value={c.code} onChange={e=>updCnae(c.id,'code',e.target.value)} placeholder="Código CNAE"/>
+              <input className="form-control" value={c.desc} onChange={e=>updCnae(c.id,'desc',e.target.value)} placeholder="Descrição"/>
+              <div className="input-prefix">
+                <span className="prefix">%</span>
+                <input type="number" className="form-control" value={(c.tax*100).toFixed(1)} onChange={e=>updCnae(c.id,'tax',+e.target.value/100)} min={0} max={100} step={0.1}/>
+              </div>
+              <button className="btn-icon" onClick={()=>delCnae(c.id)}>🗑</button>
+            </div>
+          ))}
+        </div>
+      )}
+      {tab==='custosfixos'&&(
+        <div className="card">
+          <div className="flex-between mb-16">
+            <div>
+              <div className="card-title" style={{marginBottom:2}}>Custos Fixos da Empresa</div>
+              <div style={{fontSize:13,color:'var(--txl)'}}>Total mensal: <strong style={{color:'var(--vd)'}}>{fmtBRL(cfMensal)}</strong></div>
+            </div>
+            <button className="btn btn-secondary btn-sm" onClick={addCF}>+ Adicionar</button>
+          </div>
+          {fixedCosts.map(c=>(
+            <div key={c.id} style={{display:'grid',gridTemplateColumns:'2fr 1fr 120px auto',gap:10,marginBottom:8,alignItems:'center'}}>
+              <input className="form-control" value={c.nome} onChange={e=>updCF(c.id,'nome',e.target.value)} placeholder="Nome do custo"/>
+              <select className="form-control" value={c.tipo} onChange={e=>updCF(c.id,'tipo',e.target.value)}>
+                <option value="mensal">Mensal</option>
+                <option value="anual">Anual</option>
+              </select>
+              <div className="input-prefix">
+                <span className="prefix">R$</span>
+                <input type="number" className="form-control" value={c.valor} onChange={e=>updCF(c.id,'valor',+e.target.value)} min={0} step={0.01}/>
+              </div>
+              <button className="btn-icon" onClick={()=>delCF(c.id)}>🗑</button>
+            </div>
+          ))}
+          <div style={{borderTop:'1px solid var(--bd)',paddingTop:10,marginTop:6,display:'flex',justifyContent:'space-between',fontWeight:700}}>
+            <span>Total mensal consolidado</span>
+            <span style={{color:'var(--vd)'}}>{fmtBRL(cfMensal)}</span>
+          </div>
+        </div>
+      )}
+      {tab==='textos'&&(
+        <div>
+          <div className="card mb-16"><div className="card-title">Não incluso no escopo (padrão)</div><textarea className="form-control" rows={7} value={configs.notIncluded||''} onChange={e=>setConfigs(c=>({...c,notIncluded:e.target.value}))}/></div>
+          <div className="card mb-16"><div className="card-title">Responsabilidades da Contratada (padrão)</div><textarea className="form-control" rows={5} value={configs.respContratada||''} onChange={e=>setConfigs(c=>({...c,respContratada:e.target.value}))}/></div>
+          <div className="card mb-16"><div className="card-title">Responsabilidades da Contratante (padrão)</div><textarea className="form-control" rows={4} value={configs.respContratante||''} onChange={e=>setConfigs(c=>({...c,respContratante:e.target.value}))}/></div>
+          <div className="card mb-16"><div className="card-title">Texto sobre o que está incluso no valor (padrão)</div><textarea className="form-control" rows={4} value={configs.costText||''} onChange={e=>setConfigs(c=>({...c,costText:e.target.value}))}/></div>
+          <div className="card"><div className="card-title">Validade padrão das propostas (dias)</div><input type="number" className="form-control" style={{maxWidth:120}} value={configs.validity||20} onChange={e=>setConfigs(c=>({...c,validity:+e.target.value}))}/></div>
+        </div>
+      )}
+      {tab==='empresa'&&(
+        <div className="card">
+          <div className="card-title">Dados da Empresa</div>
+          {[['name','Razão Social'],['cnpj','CNPJ'],['responsavel','Responsável Técnica'],['endereco','Endereço'],['contato','Telefone / WhatsApp']].map(([k,l])=>(
+            <div key={k} className="form-group"><label className="form-label">{l}</label><input className="form-control" value={configs.empresa?.[k]||''} onChange={e=>setConfigs(c=>({...c,empresa:{...c.empresa,[k]:e.target.value}}))}/></div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.render(<App/>,document.getElementById('root'));
+</script>
+</body>
+</html>
