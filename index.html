@@ -809,22 +809,33 @@ function App(){
   },[]);
 
   const loadFromFirebase=async()=>{
+    // Firebase é SEMPRE a fonte de verdade
+    setSyncStatus('Sincronizando...');
     try{
-      setSyncStatus('Sincronizando...');
+      // Propostas: cada uma é um doc separado
       const ps=await FB.loadAll('proposals',[]);
-      if(ps&&ps.length>0) setProposals(ps.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)));
-      else setProposals(LS.get('orv_proposals2',[]));
+      if(ps&&ps.length>0){
+        const sorted=ps.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+        setProposals(sorted);
+        LS.set('orv_proposals2',sorted);
+      }
+      // Configurações
       const sv=await FB.load('config','services',null);
-      if(sv) setServices(Array.isArray(sv)?sv:DEFAULT_SERVICES);
+      if(sv){const v=Array.isArray(sv)?sv:DEFAULT_SERVICES;setServices(v);LS.set('orv_services2',v);}
       const cn=await FB.load('config','cnaes',null);
-      if(cn) setCnaes(Array.isArray(cn)?cn:DEFAULT_CNAE);
+      if(cn){const v=Array.isArray(cn)?cn:DEFAULT_CNAE;setCnaes(v);LS.set('orv_cnaes2',v);}
       const cf=await FB.load('config','fixedcosts',null);
-      if(cf) setFixedCosts(Array.isArray(cf)?cf:DEFAULT_FIXED_COSTS);
+      if(cf){const v=Array.isArray(cf)?cf:DEFAULT_FIXED_COSTS;setFixedCosts(v);LS.set('orv_fixedcosts2',v);}
       const cfg=await FB.load('config','configs',null);
-      if(cfg) setConfigs(cfg);
+      if(cfg){setConfigs(cfg);LS.set('orv_configs2',cfg);}
       setSyncStatus('✓ Salvo na nuvem');
       setTimeout(()=>setSyncStatus(''),3000);
-    }catch(e){ setSyncStatus('⚠️ Modo offline'); setProposals(LS.get('orv_proposals2',[])); }
+    }catch(e){
+      console.error('Firebase erro:',e);
+      setSyncStatus('⚠️ Modo offline — carregando dados locais');
+      // Só usa localStorage como fallback se Firebase falhar
+      setProposals(LS.get('orv_proposals2',[]));
+    }
   };
 
   useEffect(()=>{
